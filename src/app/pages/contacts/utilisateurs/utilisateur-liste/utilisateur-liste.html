@@ -71,8 +71,11 @@
                         <th pSortableColumn="phone">
                             <span class="flex items-center gap-2">Telephone <p-sortIcon field="phone" /></span>
                         </th>
-                        <th pSortableColumn="email">
-                            <span class="flex items-center gap-2">Email <p-sortIcon field="email" /></span>
+                        <th pSortableColumn="roleLabel">
+                            <span class="flex items-center gap-2">Role <p-sortIcon field="roleLabel" /></span>
+                        </th>
+                        <th pSortableColumn="siteLabel">
+                            <span class="flex items-center gap-2">Site <p-sortIcon field="siteLabel" /></span>
                         </th>
                         <th pSortableColumn="ville">
                             <span class="flex items-center gap-2">Adresse <p-sortIcon field="ville" /></span>
@@ -112,7 +115,13 @@
 
                         <td>
                             <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
-                                {{ user.email || '-' }}
+                                {{ user.roleLabel }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
+                                {{ user.siteLabel }}
                             </span>
                         </td>
 
@@ -159,7 +168,7 @@
 
                 <ng-template #emptymessage>
                     <tr>
-                        <td colspan="8" class="py-10 text-center text-surface-500 dark:text-surface-400">
+                        <td colspan="9" class="py-10 text-center text-surface-500 dark:text-surface-400">
                             Aucun utilisateur trouve.
                         </td>
                     </tr>

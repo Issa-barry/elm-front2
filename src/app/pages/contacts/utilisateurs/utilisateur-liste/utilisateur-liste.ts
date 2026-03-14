@@ -25,6 +25,8 @@ type StatusSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'co
 interface UtilisateurRow extends User {
   name: string;
   statusLabel: 'Actif' | 'Inactif';
+  roleLabel: string;
+  siteLabel: string;
 }
 
 @Component({
@@ -257,6 +259,8 @@ export class UtilisateurListe implements OnInit {
       user.name,
       user.phone,
       user.email,
+      user.roleLabel,
+      user.siteLabel,
       user.ville,
       user.quartier,
       user.pays,
@@ -276,6 +280,8 @@ export class UtilisateurListe implements OnInit {
       ...user,
       name: user.nom_complet || `${user.prenom} ${user.nom}`.trim(),
       statusLabel: this.isUserActive(user) ? 'Actif' : 'Inactif',
+      roleLabel: this.resolveRoleLabel(user),
+      siteLabel: this.resolveSiteLabel(user),
     };
   }
 
@@ -287,6 +293,97 @@ export class UtilisateurListe implements OnInit {
   private extractUsers(response: ApiResponse<User[]> | PaginatedResponse<User>): User[] {
     const data = response.data;
     return Array.isArray(data) ? data : (data.data ?? []);
+  }
+
+  private resolveRoleLabel(user: User): string {
+    const raw = user as User & {
+      role?: unknown;
+      role_name?: unknown;
+      role_label?: unknown;
+      roles?: unknown;
+      role_names?: unknown;
+    };
+
+    const roleNames = this.toStringArray(raw.role_names);
+    if (roleNames.length > 0) return roleNames.join(', ');
+
+    const roles = this.toStringArray(raw.roles);
+    if (roles.length > 0) return roles.join(', ');
+
+    return (
+      this.toStringValue(raw.role_label) ??
+      this.toStringValue(raw.role_name) ??
+      this.toStringValue(raw.role) ??
+      '-'
+    );
+  }
+
+  private resolveSiteLabel(user: User): string {
+    const raw = user as unknown as Record<string, unknown>;
+
+    const directKeys = [
+      'site_label',
+      'site_name',
+      'site_nom',
+      'nom_site',
+      'usine_label',
+      'usine_name',
+      'usine_nom',
+      'site',
+      'usine',
+    ];
+
+    for (const key of directKeys) {
+      const label = this.extractSiteName(raw[key]);
+      if (label) return label;
+    }
+
+    const nestedKeys = ['current_site', 'current_usine', 'default_site', 'default_usine'];
+    for (const key of nestedKeys) {
+      const label = this.extractSiteName(raw[key]);
+      if (label) return label;
+    }
+
+    const listKeys = ['sites', 'usines', 'accessible_sites', 'accessible_usines'];
+    for (const key of listKeys) {
+      const value = raw[key];
+      if (!Array.isArray(value) || value.length === 0) continue;
+      const firstSite = this.extractSiteName(value[0]);
+      if (firstSite) return firstSite;
+    }
+
+    return '-';
+  }
+
+  private extractSiteName(value: unknown): string | null {
+    if (typeof value === 'string') {
+      return this.toStringValue(value);
+    }
+
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const site = value as Record<string, unknown>;
+    const keys = ['nom', 'name', 'label', 'site_name', 'site_nom', 'usine_name', 'usine_nom'];
+
+    for (const key of keys) {
+      const label = this.toStringValue(site[key]);
+      if (label) return label;
+    }
+
+    return null;
+  }
+
+  private toStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => this.toStringValue(item)).filter((item): item is string => item !== null);
+  }
+
+  private toStringValue(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
 }
  

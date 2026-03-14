@@ -103,6 +103,9 @@
                             formControlName="phone"
                             [class.ng-invalid]="isFieldInvalid('phone')"
                             class="w-full"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                             placeholder="Numéro de téléphone"
                         />
                         @if (isFieldInvalid('phone') || getFieldError('phone')) {
@@ -169,3 +172,4 @@
 </div>
 
 <app-configurator [simple]="false" />
+

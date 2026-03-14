@@ -57,19 +57,21 @@
                             </td>
                             <td>
                                 <div class="flex items-center gap-2">
-                                    <img [src]="user.avatar" alt="" class="w-8 h-8 rounded-full" />
+                                    <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-100 text-xs font-semibold flex items-center justify-center">
+                                        {{ getInitials(user.name) }}
+                                    </div>
                                     <span class="text-surface-950 dark:text-surface-0 text-sm font-medium leading-tight">{{ user.name }}</span>
                                 </div>
                             </td>
                             <td>
-                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">+33758855039</span>
+                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ user.phone | phoneFormat }}</span>
                             </td>
                              <td>
                                 <p-tag [value]="user.status" [severity]="getStatusSeverity(user.status)" class="px-2 py-1 rounded-[6px]" />
                             </td>
                           
                             <td>
-                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">12/12/2025</span>
+                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ formatDate(user.created_at) }}</span>
                             </td>
                            
                             <td>

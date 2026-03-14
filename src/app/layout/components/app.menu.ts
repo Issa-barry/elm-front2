@@ -54,7 +54,7 @@ export class AppMenu {
                         {
                             label: 'Utilisateurs',
                             icon: 'pi pi-fw pi-user',
-                            routerLink: ['/apps/cms/detail2']
+                            routerLink: ['/contacts/utilisateurs']
                         },
                         
                     ]

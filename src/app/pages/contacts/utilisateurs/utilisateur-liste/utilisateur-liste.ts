@@ -1,0 +1,292 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { Menu, MenuModule } from 'primeng/menu';
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+
+import { PhoneFormatPipe } from '@/app/pipes/phone-format.pipe';
+import { User } from '@/models/user.model';
+import { AuthService } from '@/services/auth/auth.service';
+import { ApiResponse, PaginatedResponse, UserFilters, UserService } from '@/services/users/users.service';
+
+type UtilisateurFilter = 'all' | 'actif' | 'inactif';
+type StatusSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined;
+
+interface UtilisateurRow extends User {
+  name: string;
+  statusLabel: 'Actif' | 'Inactif';
+}
+
+@Component({
+  selector: 'app-utilisateur-liste',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    InputTextModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    SelectModule,
+    ConfirmDialogModule,
+    MenuModule,
+    PhoneFormatPipe,
+  ],
+  providers: [MessageService, ConfirmationService],
+  templateUrl: './utilisateur-liste.html',
+  styleUrl: './utilisateur-liste.scss',
+})
+export class UtilisateurListe implements OnInit {
+  @ViewChild('actionMenu') actionMenu!: Menu;
+
+  users = signal<UtilisateurRow[]>([]);
+  searchQuery = signal<string>('');
+  selectedFilter = signal<UtilisateurFilter>('all');
+  filterOptions: { label: string; value: UtilisateurFilter }[] = [
+    { label: 'Tous', value: 'all' },
+    { label: 'Actifs', value: 'actif' },
+    { label: 'Inactifs', value: 'inactif' },
+  ];
+  loading = false;
+  selectedUsers: UtilisateurRow[] = [];
+  first = 0;
+  rows = 10;
+  selectedUserId = signal<number | null>(null);
+
+  get canCreate(): boolean {
+    return this.authService.hasPermission('users.create');
+  }
+  get canUpdate(): boolean {
+    return this.authService.hasPermission('users.update');
+  }
+  get canDelete(): boolean {
+    return this.authService.hasPermission('users.delete');
+  }
+
+  filteredUsers = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const list = this.users();
+    if (!query) return list;
+    return list.filter((user) => this.matchesSearch(user, query));
+  });
+
+  menuItems = computed<MenuItem[]>(() => {
+    const userId = this.selectedUserId();
+    if (!userId) return [];
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) return [];
+
+    const items: MenuItem[] = [];
+
+    if (this.canUpdate) {
+      items.push({
+        label: 'Modifier',
+        icon: 'pi pi-pencil',
+        command: () => this.goEdit(user),
+      });
+      items.push({
+        label: user.statusLabel === 'Actif' ? 'Desactiver' : 'Activer',
+        icon: 'pi pi-power-off',
+        command: () => this.toggleStatus(user),
+      });
+    }
+
+    if (this.canDelete) {
+      items.push({
+        label: 'Supprimer',
+        icon: 'pi pi-trash',
+        command: () => this.deleteUser(user),
+      });
+    }
+
+    return items;
+  });
+
+  constructor(
+    private userService: UserService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private authService: AuthService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    const filter = this.selectedFilter();
+    const filters: UserFilters | undefined = filter === 'all' ? undefined : { is_active: filter === 'actif' };
+
+    this.userService.getUsers(filters).subscribe({
+      next: (response) => {
+        const rows = this.extractUsers(response).map((user) => this.toRow(user));
+        this.users.set(rows);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les utilisateurs.',
+          life: 5000,
+        });
+      },
+    });
+  }
+
+  navigateToCreate(): void {
+    this.router.navigate(['/contacts/utilisateurs/new']);
+  }
+
+  goEdit(user: UtilisateurRow): void {
+    this.router.navigate(['/contacts/utilisateurs/edit', user.id]);
+  }
+
+  onFilterChange(value: UtilisateurFilter): void {
+    this.selectedFilter.set(value);
+    this.first = 0;
+    this.load();
+  }
+
+  onSearchChange(value: string): void {
+    this.searchQuery.set(value ?? '');
+    this.first = 0;
+  }
+
+  toggleMenu(event: Event, userId: number): void {
+    this.selectedUserId.set(userId);
+    this.actionMenu.toggle(event);
+  }
+
+  deleteUser(user: UtilisateurRow): void {
+    this.confirmationService.confirm({
+      message: `Supprimer ${user.name} ?`,
+      header: "Supprimer l'utilisateur",
+      icon: 'pi pi-trash',
+      rejectButtonProps: { label: 'Annuler', severity: 'secondary', outlined: true },
+      acceptButtonProps: { label: 'Supprimer', severity: 'danger' },
+      accept: () => {
+        this.userService.deleteUser(user.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Supprime',
+              detail: `${user.name} supprime.`,
+              life: 3000,
+            });
+            this.users.update((list) => list.filter((item) => item.id !== user.id));
+          },
+          error: (err) =>
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err.error?.message || 'Impossible de supprimer.',
+              life: 5000,
+            }),
+        });
+      },
+    });
+  }
+
+  toggleStatus(user: UtilisateurRow): void {
+    const action = user.statusLabel === 'Actif' ? 'desactiver' : 'activer';
+
+    this.confirmationService.confirm({
+      message: `Voulez-vous vraiment ${action} cet utilisateur ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectButtonProps: { label: 'Annuler', severity: 'secondary', outlined: true },
+      acceptButtonProps: { label: 'Confirmer' },
+      accept: () => {
+        this.userService.toggleUserStatus(user.id).subscribe({
+          next: (response) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succes',
+              detail: response.message || 'Statut mis a jour.',
+              life: 3000,
+            });
+            this.load();
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: err.error?.message || 'Impossible de changer le statut.',
+              life: 5000,
+            });
+          },
+        });
+      },
+    });
+  }
+
+  getInitials(name: string): string {
+    const words = (name ?? '').trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return '--';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  getStatusSeverity(status: 'Actif' | 'Inactif'): StatusSeverity {
+    return status === 'Actif' ? 'success' : 'danger';
+  }
+
+  private matchesSearch(user: UtilisateurRow, query: string): boolean {
+    const searchable = [
+      user.prenom,
+      user.nom,
+      user.nom_complet,
+      user.name,
+      user.phone,
+      user.email,
+      user.ville,
+      user.quartier,
+      user.pays,
+      user.statusLabel,
+    ]
+      .filter((value) => !!value)
+      .join(' ')
+      .toLowerCase();
+
+    const normalizedSearchable = searchable.replace(/\s+/g, '');
+    const normalizedQuery = query.replace(/\s+/g, '');
+    return searchable.includes(query) || normalizedSearchable.includes(normalizedQuery);
+  }
+
+  private toRow(user: User): UtilisateurRow {
+    return {
+      ...user,
+      name: user.nom_complet || `${user.prenom} ${user.nom}`.trim(),
+      statusLabel: this.isUserActive(user) ? 'Actif' : 'Inactif',
+    };
+  }
+
+  private isUserActive(user: User): boolean {
+    const status = (user as { is_active: unknown }).is_active;
+    return status === true || status === 1 || status === '1';
+  }
+
+  private extractUsers(response: ApiResponse<User[]> | PaginatedResponse<User>): User[] {
+    const data = response.data;
+    return Array.isArray(data) ? data : (data.data ?? []);
+  }
+}
+ 

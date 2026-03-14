@@ -1,0 +1,174 @@
+:host {
+    display: block;
+}
+
+.install-app-card {
+    border-radius: 0.9rem;
+}
+
+.install-steps {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-input {
+    padding-left: 2.5rem;
+    padding-right: 2.75rem;
+}
+
+.password-left-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--p-text-muted-color);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+    color: var(--p-text-muted-color);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.password-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.login-shell {
+    min-height: 100dvh;
+}
+
+@media (max-width: 767.98px) {
+    :host {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .login-shell {
+        height: 100svh;
+        min-height: 100svh;
+        overflow: hidden;
+    }
+
+    .login-card {
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+    }
+
+    .login-form {
+        min-height: 0;
+        min-width: 0;
+        padding-bottom: 6.75rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .login-form::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
+
+    .login-phone-row {
+        align-items: stretch;
+    }
+
+    .login-submit {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+    }
+
+    :host ::ng-deep .login-card .p-inputtext {
+        min-height: 3rem;
+        font-size: 1rem;
+    }
+
+    :host ::ng-deep .login-card .p-select {
+        min-height: 3rem;
+    }
+
+    :host ::ng-deep .login-card .p-select-label {
+        padding-block: 0.75rem;
+    }
+
+    :host ::ng-deep .login-card .p-select-dropdown {
+        width: 2.5rem;
+    }
+
+    :host ::ng-deep .login-phone-row .p-select {
+        flex: 0 0 auto;
+    }
+
+    :host ::ng-deep .login-phone-row .p-inputtext {
+        width: 100%;
+    }
+
+    :host ::ng-deep .login-submit-button.p-button {
+        min-height: 3.25rem;
+        font-size: 1rem;
+    }
+
+    .install-app-card {
+        padding: 0.9rem;
+    }
+}
+
+@media (min-width: 768px) {
+    :host {
+        position: static;
+        inset: auto;
+        width: auto;
+        overflow: visible;
+    }
+
+    .login-form {
+        padding-bottom: 0;
+    }
+
+    .login-submit {
+        position: static;
+    }
+}
+
+// Safe area for mobile notches (iPhone etc.)
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 767.98px) {
+        .login-form {
+            padding-bottom: calc(6.75rem + env(safe-area-inset-bottom));
+        }
+
+        .login-submit {
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        }
+    }
+}

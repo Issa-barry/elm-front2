@@ -1,0 +1,30 @@
+export interface User {
+    id: number;
+    civilite?: string;
+    nom: string;
+    prenom: string;
+    nom_complet?: string;
+    date_naissance?: string;
+    phone: string;
+    email?: string | null;
+    pays?: string | null;
+    code_pays?: string | null;
+    code_phone_pays?: string | null;
+    ville?: string | null;
+    quartier?: string | null;
+    code_postal?: string | null;
+    adresse?: string | null;
+    reference?: string;
+    type?: string;
+    language?: string | null;
+    default_site_id?: number | null;
+    organisation_id?: number | null;
+    is_active: boolean;
+    is_archived: boolean;
+    activated_at?: string | null;
+    last_login_at?: string | null;
+    last_seen_at?: string | null;
+    roles?: string[];
+    role_names?: string[];
+    permissions?: string[];
+}

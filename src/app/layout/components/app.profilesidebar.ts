@@ -1,8 +1,9 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { BadgeModule } from 'primeng/badge';
 import { LayoutService } from '@/app/layout/service/layout.service';
+import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
     selector: '[app-profilesidebar]',
@@ -10,7 +11,7 @@ import { LayoutService } from '@/app/layout/service/layout.service';
     template: `
         <p-drawer [visible]="visible()" (onHide)="onDrawerHide()" position="right" [transitionOptions]="'.3s cubic-bezier(0, 0, 0.2, 1)'" styleClass="layout-profile-sidebar w-full sm:w-25rem">
             <div class="flex flex-col mx-auto md:mx-0">
-                <span class="mb-2 font-semibold">Welcome</span>
+                <span class="mb-2 font-semibold">Rôle : Admin entreprise</span>
                 <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">Isabella Andolini</span>
 
                 <ul class="list-none m-0 p-0">
@@ -31,7 +32,7 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                                 <i class="pi pi-money-bill text-xl text-primary"></i>
                             </span>
                             <div class="ml-4">
-                                <span class="mb-2 font-semibold">Billing</span>
+                                <span class="mb-2 font-semibold">Facturation utilisateur</span>
                                 <p class="text-surface-500 dark:text-surface-400 m-0">Amet mimin mıollit</p>
                             </div>
                         </a>
@@ -42,18 +43,18 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                                 <i class="pi pi-cog text-xl text-primary"></i>
                             </span>
                             <div class="ml-4">
-                                <span class="mb-2 font-semibold">Settings</span>
+                                <span class="mb-2 font-semibold">Paramètres</span>
                                 <p class="text-surface-500 dark:text-surface-400 m-0">Exercitation veniam</p>
                             </div>
                         </a>
                     </li>
                     <li>
-                        <a class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150">
+                        <a (click)="logout()" class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150">
                             <span>
                                 <i class="pi pi-power-off text-xl text-primary"></i>
                             </span>
                             <div class="ml-4">
-                                <span class="mb-2 font-semibold">Sign Out</span>
+                                <span class="mb-2 font-semibold">Déconnexion</span>
                                 <p class="text-surface-500 dark:text-surface-400 m-0">Sed ut perspiciatis</p>
                             </div>
                         </a>
@@ -151,6 +152,8 @@ import { LayoutService } from '@/app/layout/service/layout.service';
 export class AppProfileSidebar {
     constructor(public layoutService: LayoutService) {}
 
+    private authService = inject(AuthService);
+
     visible = computed(() => !!this.layoutService.layoutState().profileSidebarVisible);
 
     onDrawerHide() {
@@ -158,5 +161,9 @@ export class AppProfileSidebar {
             ...state,
             profileSidebarVisible: false
         }));
+    }
+
+    logout(): void {
+        this.authService.logout().subscribe({ error: () => {} });
     }
 }

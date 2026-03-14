@@ -1,0 +1,171 @@
+<!-- Background SVG waves : masque sur mobile, visible sur desktop -->
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1600 800"
+    class="fixed left-0 top-0 min-h-screen min-w-screen hidden md:block"
+    preserveAspectRatio="none"
+>
+    <rect
+        [attr.fill]="isDarkTheme() ? 'var(--p-primary-900)' : 'var(--p-primary-500)'"
+        width="1600"
+        height="800"
+    />
+    <path
+        [attr.fill]="isDarkTheme() ? 'var(--p-primary-800)' : 'var(--p-primary-400)'"
+        d="M478.4 581c3.2 0.8 6.4 1.7 9.5 2.5c196.2 52.5 388.7 133.5 593.5 176.6c174.2 36.6 349.5 29.2 518.6-10.2V0H0v574.9c52.3-17.6 106.5-27.7 161.1-30.9C268.4 537.4 375.7 554.2 478.4 581z"
+    />
+    <path
+        [attr.fill]="isDarkTheme() ? 'var(--p-primary-700)' : 'var(--p-primary-300)'"
+        d="M181.8 259.4c98.2 6 191.9 35.2 281.3 72.1c2.8 1.1 5.5 2.3 8.3 3.4c171 71.6 342.7 158.5 531.3 207.7c198.8 51.8 403.4 40.8 597.3-14.8V0H0v283.2C59 263.6 120.6 255.7 181.8 259.4z"
+    />
+    <path
+        [attr.fill]="isDarkTheme() ? 'var(--p-primary-600)' : 'var(--p-primary-200)'"
+        d="M454.9 86.3C600.7 177 751.6 269.3 924.1 325c208.6 67.4 431.3 60.8 637.9-5.3c12.8-4.1 25.4-8.4 38.1-12.9V0H288.1c56 21.3 108.7 50.6 159.7 82C450.2 83.4 452.5 84.9 454.9 86.3z"
+    />
+    <path
+        [attr.fill]="isDarkTheme() ? 'var(--p-primary-500)' : 'var(--p-primary-100)'"
+        d="M1397.5 154.8c47.2-10.6 93.6-25.3 138.6-43.8c21.7-8.9 43-18.8 63.9-29.5V0H643.4c62.9 41.7 129.7 78.2 202.1 107.4C1020.4 178.1 1214.2 196.1 1397.5 154.8z"
+    />
+</svg>
+
+<!-- Mobile: plein ecran, pas de card / Desktop: card centree comme avant -->
+<div class="login-shell min-h-screen flex flex-col md:justify-center md:items-center md:px-8">
+    <div
+        class="login-card flex-1 flex flex-col px-6 pt-16 pb-0
+            md:flex-initial md:border md:border-surface-200 md:dark:border-surface-700
+            bg-surface-0 dark:bg-surface-900
+            md:rounded md:py-16 md:px-16 md:z-10 md:w-[500px]
+            rounded-2xl"
+    >
+        <div class="flex flex-col items-center gap-4">
+            <div class="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14" width="33" height="32" viewBox="0 0 33 32" fill="none">
+                    <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M7.09219 2.87829C5.94766 3.67858 4.9127 4.62478 4.01426 5.68992C7.6857 5.34906 12.3501 5.90564 17.7655 8.61335C23.5484 11.5047 28.205 11.6025 31.4458 10.9773C31.1517 10.087 30.7815 9.23135 30.343 8.41791C26.6332 8.80919 21.8772 8.29127 16.3345 5.51998C12.8148 3.76014 9.71221 3.03521 7.09219 2.87829ZM28.1759 5.33332C25.2462 2.06 20.9887 0 16.25 0C14.8584 0 13.5081 0.177686 12.2209 0.511584C13.9643 0.987269 15.8163 1.68319 17.7655 2.65781C21.8236 4.68682 25.3271 5.34013 28.1759 5.33332ZM32.1387 14.1025C28.2235 14.8756 22.817 14.7168 16.3345 11.4755C10.274 8.44527 5.45035 8.48343 2.19712 9.20639C2.0292 9.24367 1.86523 9.28287 1.70522 9.32367C1.2793 10.25 0.939308 11.2241 0.695362 12.2356C0.955909 12.166 1.22514 12.0998 1.50293 12.0381C5.44966 11.161 11.0261 11.1991 17.7655 14.5689C23.8261 17.5991 28.6497 17.561 31.9029 16.838C32.0144 16.8133 32.1242 16.7877 32.2322 16.7613C32.2441 16.509 32.25 16.2552 32.25 16C32.25 15.358 32.2122 14.7248 32.1387 14.1025ZM31.7098 20.1378C27.8326 20.8157 22.5836 20.5555 16.3345 17.431C10.274 14.4008 5.45035 14.439 2.19712 15.1619C1.475 15.3223 0.825392 15.5178 0.252344 15.7241C0.250782 15.8158 0.25 15.9078 0.25 16C0.25 24.8366 7.41344 32 16.25 32C23.6557 32 29.8862 26.9687 31.7098 20.1378Z"
+                        class="fill-surface-700 dark:fill-surface-200"
+                    />
+                </svg>
+            </div>
+            <div class="flex flex-col items-center gap-2 w-full">
+                <div class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight text-center w-full">Eau la maman</div>
+                <div class="text-center w-full">
+                    <a class="text-primary font-medium ml-1 cursor-pointer hover:text-primary-emphasis">Connectez-vous</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Titre : centre sur mobile, aligne gauche sur desktop -->
+        <div class="mb-10 text-center md:text-left">
+            <div class="text-surface-900 dark:text-surface-0 text-2xl md:text-xl font-bold">
+                <!-- Connexion -->
+            </div>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form flex flex-col flex-1 min-w-0 md:flex-initial">
+
+            <!-- Erreur globale serveur -->
+            @if (errorMessage()) {
+                <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-4" />
+            }
+
+            <!-- Pays + Téléphone -->
+            <div class="mb-6">
+                <div class="login-phone-row flex gap-3">
+                    <p-select
+                        [(ngModel)]="selectedCountry"
+                        [ngModelOptions]="{ standalone: true }"
+                        [options]="countries"
+                        (onChange)="onCountryChange()"
+                        optionLabel="name"
+                        styleClass="flex-shrink-0"
+                    >
+                        <ng-template #selectedItem let-country>
+                            <span class="flex items-center gap-1">
+                                <span>{{ country.flag }}</span>
+                                <span class="text-sm font-medium">{{ country.dialCode }}</span>
+                            </span>
+                        </ng-template>
+                        <ng-template #item let-country>
+                            <span class="flex items-center gap-2">
+                                <span>{{ country.flag }}</span>
+                                <span class="text-sm">{{ country.name }}</span>
+                                <span class="text-surface-400 text-xs ml-auto">{{ country.dialCode }}</span>
+                            </span>
+                        </ng-template>
+                    </p-select>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <input
+                            id="phone"
+                            type="tel"
+                            pInputText
+                            formControlName="phone"
+                            [class.ng-invalid]="isFieldInvalid('phone')"
+                            class="w-full"
+                            placeholder="Numéro de téléphone"
+                        />
+                        @if (isFieldInvalid('phone') || getFieldError('phone')) {
+                            <small class="text-red-500 mt-1">
+                                {{ getFieldError('phone') ?? 'Numéro de téléphone requis' }}
+                            </small>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="mb-6">
+                <div class="password-field">
+                    <span class="password-left-icon pi pi-lock"></span>
+                    <input
+                        id="password"
+                        [type]="showPassword() ? 'text' : 'password'"
+                        pInputText
+                        formControlName="password"
+                        [class.ng-invalid]="isFieldInvalid('password')"
+                        class="w-full password-input"
+                        placeholder="Mot de passe"
+                    />
+                    <button type="button" class="password-toggle" (click)="showPassword.set(!showPassword())">
+                        <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                    </button>
+                </div>
+                @if (isFieldInvalid('password') || getFieldError('password')) {
+                    <small class="text-red-500 mt-1">
+                        {{ getFieldError('password') ?? 'Mot de passe requis (6 caractères minimum)' }}
+                    </small>
+                }
+            </div>
+
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-2">
+                    <p-checkbox formControlName="remember_me" [binary]="true" inputId="remember_me" />
+                    <label for="remember_me" class="text-surface-900 dark:text-surface-0 text-sm cursor-pointer">
+                        Se souvenir de moi
+                    </label>
+                </div>
+                <a class="text-primary text-sm cursor-pointer hover:underline md:hidden">
+                    Mot de passe oublié ?
+                </a>
+            </div>
+
+            <div
+                class="login-submit px-6 pt-5 pb-3 border-t border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900
+                    md:px-0 md:pt-0 md:pb-0 md:border-0"
+            >
+                <button
+                    pButton
+                    pRipple
+                    type="submit"
+                    [label]="isLoading() ? 'Connexion...' : 'Me connecter'"
+                    [loading]="isLoading()"
+                    [disabled]="isLoading()"
+                    class="login-submit-button w-full border-round-xl md:border-round"
+                ></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<app-configurator [simple]="false" />

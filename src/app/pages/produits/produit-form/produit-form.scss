@@ -1,0 +1,15 @@
+:host {
+    display: block;
+}
+
+// Hide the default p-fileupload header/toolbar
+::ng-deep .p-fileupload-header,
+::ng-deep .p-fileupload-buttonbar {
+    display: none !important;
+}
+
+::ng-deep .p-fileupload-content {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}

@@ -21,17 +21,17 @@ export class AppMenu {
     model: any[] = [
         {
             label: 'Dashboards',
-            icon: 'pi pi-home',
+            icon: 'pi pi-chart-bar',
             path: '/dashboards',
             items: [
                 {
                     label: 'Stats-ventes',
-                    icon: 'pi pi-fw pi-home',
+                    icon: 'pi pi-fw pi-chart-bar',
                     routerLink: ['/']
                 },
                 {
                     label: 'Stats',
-                    icon: 'pi pi-fw pi-image',
+                    icon: 'pi pi-fw pi-chart-bar',
                     routerLink: ['/dashboard-banking']
                 }
             ]
@@ -43,17 +43,17 @@ export class AppMenu {
             items: [
                {
                     label: 'Contacts',
-                    icon: 'pi pi-fw pi-comment',
+                    icon: 'pi pi-fw pi-address-book',
                     path: '/apps/cms',
                     items: [
                         {
                             label: 'Prestataires',
-                            icon: 'pi pi-fw pi-list',
+                            icon: 'pi pi-fw pi-users',
                             routerLink: ['/apps/cms/detail']
                         },
                         {
                             label: 'Utilisateurs',
-                            icon: 'pi pi-fw pi-list',
+                            icon: 'pi pi-fw pi-user',
                             routerLink: ['/apps/cms/detail2']
                         },
                         
@@ -62,78 +62,78 @@ export class AppMenu {
 
                 {
                     label: 'Packing',
-                    icon: 'pi pi-fw pi-comments',
+                    icon: 'pi pi-fw pi-box',
                     routerLink: ['/apps/chat']
                 },
                 {
                     label: 'Produits',
-                    icon: 'pi pi-fw pi-folder',
-                    routerLink: ['/apps/files']
+                    icon: 'pi pi-fw pi-barcode',
+                    routerLink: ['/produits']
                 },
 
               
                  {
                     label: 'Véhicules',
-                    icon: 'pi pi-fw pi-comment',
+                    icon: 'pi pi-fw pi-car',
                     path: '/apps/cms',
                     items: [
                        
                         {
                             label: 'Liste des véhicules',
                             icon: 'pi pi-fw pi-list',
-                            routerLink: ['/apps/cms/detail2']
+                            routerLink: ['/vehicules']
                         },
                         {
                             label: 'Livreurs',
-                            icon: 'pi pi-fw pi-image',
-                            routerLink: ['/apps/cms/list']
+                            icon: 'pi pi-fw pi-truck',
+                            routerLink: ['/vehicules/livreurs']
                         },
                         {
                             label: 'Prestataires',
-                            icon: 'pi pi-fw pi-pencil',
+                            icon: 'pi pi-fw pi-user',
                             routerLink: ['/apps/cms/edit']
                         }
                     ]
                 },
             ]
         },
-        {
-            label: 'ADMINISTRATION',
-            icon: 'pi pi-fw pi-briefcase',
-            path: '/pages',
-            items: [
+        // {
+        //     label: 'ADMINISTRATION',
+        //     icon: 'pi pi-fw pi-briefcase',
+        //     path: '/pages',
+        //     items: [
                 
-                {
-                    label: 'Paramètres',
-                    icon: 'pi pi-fw pi-cog',
-                    path: '/auth',
-                    items: [
-                        {
-                            label: 'Générale',
-                            icon: 'pi pi-fw pi-sign-in',
-                            routerLink: ['/auth/login']
-                        },
-                        {
-                            label: 'Profile',
-                            icon: 'pi pi-fw pi-times-circle',
-                            routerLink: ['/auth/error']
-                        },
-                        {
-                            label: 'Organisations',
-                            icon: 'pi pi-fw pi-lock',
-                            routerLink: ['/auth/access']
-                        },
-                        {
-                            label: 'Sites',
-                            icon: 'pi pi-fw pi-user-plus',
-                            routerLink: ['/auth/register']
-                        },
+        //         {
+        //             label: 'Paramètres',
+        //             icon: 'pi pi-fw pi-cog',
+        //             path: '/auth',
+        //             items: [
+        //                 {
+        //                     label: 'Générale',
+        //                     icon: 'pi pi-fw pi-sign-in',
+        //                     routerLink: ['/auth/login']
+        //                 },
+        //                 {
+        //                     label: 'Profile',
+        //                     icon: 'pi pi-fw pi-times-circle',
+        //                     routerLink: ['/auth/error']
+        //                 },
+        //                 {
+        //                     label: 'Organisations',
+        //                     icon: 'pi pi-fw pi-lock',
+        //                     routerLink: ['/auth/access']
+        //                 },
+        //                 {
+        //                     label: 'Sites',
+        //                     icon: 'pi pi-fw pi-user-plus',
+        //                     routerLink: ['/auth/register']
+        //                 },
                          
-                    ]
-                },
+        //             ]
+        //         },
                 
-            ]
-        },
+        //     ]
+        // },
          
     ];
 }

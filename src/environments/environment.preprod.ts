@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://preprod.usine-eau-api.fr/api/v1'
+    apiUrl: 'https://usine-eau-api.fr/api/v1',
 };

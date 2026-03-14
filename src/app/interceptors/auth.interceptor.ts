@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 
 const TOKEN_KEY = 'access_token';
 const USER_KEY  = 'user';
@@ -10,6 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const token      = sessionStorage.getItem(TOKEN_KEY);
     const isFormData = req.body instanceof FormData;
     const router     = inject(Router);
+    const usineCtx   = inject(UsineContextService);
 
     const headers: Record<string, string> = {
         Accept: 'application/json',
@@ -21,6 +23,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     if (!isFormData) {
         headers['Content-Type'] = 'application/json';
+    }
+
+    const siteId = usineCtx.headerUsineId();
+    if (siteId !== null) {
+        headers['X-Site-Id'] = String(siteId);
     }
 
     const authReq = req.clone({ setHeaders: headers });

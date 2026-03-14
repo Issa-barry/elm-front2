@@ -1,64 +1,152 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { MeResponse } from '@/models/usine.model';
+import { AccessibleUsine, MeResponse } from '@/models/usine.model';
 
-export interface UsineInfo {
-    id: number;
-    name?: string;
-    type?: string;
-    is_default?: boolean;
+const STORAGE_KEY = 'site_context';
+const LEGACY_STORAGE_KEY = 'usine_context';
+
+interface PersistedUsineContext {
+  currentUsineId: number | null;
+  defaultUsineId: number | null;
+  isSiegeUser: boolean;
+  accessibleUsines: AccessibleUsine[];
+  isConsolidated: boolean;
 }
 
+/**
+ * Signal store for site context.
+ * Kept under legacy class name for backward compatibility in the codebase.
+ */
 @Injectable({ providedIn: 'root' })
 export class UsineContextService {
-    // Usines accessibles à l'utilisateur
-    accessibleUsines = signal<UsineInfo[]>([]);
+  private readonly _currentUsineId = signal<number | null>(null);
+  private readonly _defaultUsineId = signal<number | null>(null);
+  private readonly _isSiegeUser = signal<boolean>(false);
+  private readonly _accessibleUsines = signal<AccessibleUsine[]>([]);
+  private readonly _isConsolidated = signal<boolean>(false);
 
-    // Usine courante sélectionnée (null = toutes / siège)
-    currentUsineId  = signal<number | null>(null);
+  readonly currentUsineId = this._currentUsineId.asReadonly();
+  readonly defaultUsineId = this._defaultUsineId.asReadonly();
+  readonly isSiegeUser = this._isSiegeUser.asReadonly();
+  readonly accessibleUsines = this._accessibleUsines.asReadonly();
+  readonly isConsolidated = this._isConsolidated.asReadonly();
 
-    // Usine par défaut
-    defaultUsineId  = signal<number | null>(null);
+  readonly currentUsine = computed<AccessibleUsine | null>(() => {
+    const id = this._currentUsineId();
+    if (id === null) return null;
+    return this._accessibleUsines().find((site) => site.id === id) ?? null;
+  });
 
-    // Si l'utilisateur est de type siège
-    isSiegeUser = signal<boolean>(false);
-
-    /** Valeur à envoyer dans l'en-tête X-Site-Id */
-    headerUsineId = computed<number | string | null>(() => {
-        const current = this.currentUsineId();
-        if (current !== null) return current;
-        if (this.isSiegeUser()) return 'all';
-        return this.defaultUsineId();
-    });
-
-    hydrateFromMe(data: MeResponse): void {
-        // Extraire les sites/usines du payload /auth/me
-        const sites: UsineInfo[] = data['sites'] ?? data['usines'] ?? [];
-        if (sites.length > 0) {
-            this.accessibleUsines.set(sites);
-        }
-
-        const defaultSite = sites.find(s => s.is_default) ?? sites[0] ?? null;
-        if (defaultSite) {
-            this.defaultUsineId.set(defaultSite.id);
-        }
-
-        // Déterminer si siège via type ou champ dédié
-        const isSiege: boolean = data['is_siege'] ?? data['isSiege'] ?? false;
-        this.isSiegeUser.set(isSiege);
+  /**
+   * Header value to send on API requests.
+   * - number: one selected site
+   * - 'all': consolidated HQ view
+   * - null: not ready yet (before /auth/me hydration)
+   */
+  readonly headerUsineId = computed<number | 'all' | null>(() => {
+    if (this._isConsolidated()) {
+      return this._isSiegeUser() ? 'all' : null;
     }
 
-    setCurrentUsine(id: number | null): void {
-        this.currentUsineId.set(id);
+    return this._currentUsineId();
+  });
+
+  constructor() {
+    this.restoreFromStorage();
+  }
+
+  hydrateFromMe(me: MeResponse): void {
+    const accessibleSites = me.accessible_sites ?? me.accessible_usines ?? [];
+    const defaultSiteId = me.default_site_id ?? me.default_usine_id ?? null;
+    const currentSiteId = me.current_site_id ?? me.current_usine_id ?? defaultSiteId;
+
+    this._isSiegeUser.set(!!me.is_siege_user);
+    this._accessibleUsines.set(accessibleSites);
+    this._defaultUsineId.set(defaultSiteId);
+
+    const knownSiteIds = new Set(accessibleSites.map((site) => site.id));
+    const resolvedCurrent =
+      currentSiteId !== null && knownSiteIds.has(currentSiteId)
+        ? currentSiteId
+        : defaultSiteId !== null && knownSiteIds.has(defaultSiteId)
+          ? defaultSiteId
+          : accessibleSites[0]?.id ?? null;
+
+    this._currentUsineId.set(resolvedCurrent);
+    this._isConsolidated.set(!!me.is_siege_user && resolvedCurrent === null);
+
+    this.persist();
+  }
+
+  switchUsine(usineId: number): void {
+    const siteExists = this._accessibleUsines().some((site) => site.id === usineId);
+    if (!siteExists) return;
+
+    this._currentUsineId.set(usineId);
+    this._isConsolidated.set(false);
+    this.persist();
+  }
+
+  enableConsolidatedView(): void {
+    if (!this._isSiegeUser()) return;
+    this._currentUsineId.set(null);
+    this._isConsolidated.set(true);
+    this.persist();
+  }
+
+  fallbackToDefault(): void {
+    const defaultId = this._defaultUsineId();
+
+    if (defaultId !== null) {
+      this.switchUsine(defaultId);
+      return;
     }
 
-    fallbackToDefault(): void {
-        this.currentUsineId.set(this.defaultUsineId());
+    if (this._isSiegeUser()) {
+      this.enableConsolidatedView();
+      return;
     }
 
-    clear(): void {
-        this.accessibleUsines.set([]);
-        this.currentUsineId.set(null);
-        this.defaultUsineId.set(null);
-        this.isSiegeUser.set(false);
+    const first = this._accessibleUsines()[0];
+    if (first) {
+      this.switchUsine(first.id);
     }
+  }
+
+  clear(): void {
+    this._currentUsineId.set(null);
+    this._defaultUsineId.set(null);
+    this._isSiegeUser.set(false);
+    this._accessibleUsines.set([]);
+    this._isConsolidated.set(false);
+    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(LEGACY_STORAGE_KEY);
+  }
+
+  private persist(): void {
+    const ctx: PersistedUsineContext = {
+      currentUsineId: this._currentUsineId(),
+      defaultUsineId: this._defaultUsineId(),
+      isSiegeUser: this._isSiegeUser(),
+      accessibleUsines: this._accessibleUsines(),
+      isConsolidated: this._isConsolidated(),
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ctx));
+  }
+
+  private restoreFromStorage(): void {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(LEGACY_STORAGE_KEY);
+      if (!raw) return;
+
+      const ctx = JSON.parse(raw) as PersistedUsineContext;
+      this._currentUsineId.set(ctx.currentUsineId ?? null);
+      this._defaultUsineId.set(ctx.defaultUsineId ?? null);
+      this._isSiegeUser.set(ctx.isSiegeUser ?? false);
+      this._accessibleUsines.set(Array.isArray(ctx.accessibleUsines) ? ctx.accessibleUsines : []);
+      this._isConsolidated.set(!!ctx.isConsolidated && !!ctx.isSiegeUser);
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(LEGACY_STORAGE_KEY);
+    }
+  }
 }

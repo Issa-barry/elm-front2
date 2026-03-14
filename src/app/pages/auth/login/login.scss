@@ -13,6 +13,34 @@
     gap: 0.35rem;
 }
 
+.country-selected,
+.country-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.country-option {
+    width: 100%;
+}
+
+.country-flag-img {
+    display: inline-block;
+    border-radius: 2px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.country-name {
+    font-size: 0.9rem;
+}
+
+.country-dial {
+    font-size: 0.8rem;
+    color: var(--p-text-muted-color);
+    margin-left: auto;
+}
+
 .password-field {
     position: relative;
 }

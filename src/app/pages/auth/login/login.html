@@ -9,7 +9,7 @@
         [attr.fill]="isDarkTheme() ? 'var(--p-primary-900)' : 'var(--p-primary-500)'"
         width="1600"
         height="800"
-    />
+    /> 
     <path
         [attr.fill]="isDarkTheme() ? 'var(--p-primary-800)' : 'var(--p-primary-400)'"
         d="M478.4 581c3.2 0.8 6.4 1.7 9.5 2.5c196.2 52.5 388.7 133.5 593.5 176.6c174.2 36.6 349.5 29.2 518.6-10.2V0H0v574.9c52.3-17.6 106.5-27.7 161.1-30.9C268.4 537.4 375.7 554.2 478.4 581z"
@@ -79,19 +79,31 @@
                         [options]="countries"
                         (onChange)="onCountryChange()"
                         optionLabel="name"
-                        styleClass="flex-shrink-0"
+                        styleClass="flex-shrink-0 login-country-select"
                     >
-                        <ng-template #selectedItem let-country>
-                            <span class="flex items-center gap-1">
-                                <span>{{ country.flag }}</span>
-                                <span class="text-sm font-medium">{{ country.dialCode }}</span>
+                        <ng-template pTemplate="selectedItem" let-country>
+                            <span class="country-selected" *ngIf="country">
+                                <img
+                                    [src]="'https://flagcdn.com/w20/' + country.code.toLowerCase() + '.png'"
+                                    [alt]="country.name"
+                                    class="country-flag-img"
+                                    width="20"
+                                    height="15"
+                                />
+                                <span class="country-dial">{{ country.dialCode }}</span>
                             </span>
                         </ng-template>
-                        <ng-template #item let-country>
-                            <span class="flex items-center gap-2">
-                                <span>{{ country.flag }}</span>
-                                <span class="text-sm">{{ country.name }}</span>
-                                <span class="text-surface-400 text-xs ml-auto">{{ country.dialCode }}</span>
+                        <ng-template pTemplate="item" let-country>
+                            <span class="country-option">
+                                <img
+                                    [src]="'https://flagcdn.com/w20/' + country.code.toLowerCase() + '.png'"
+                                    [alt]="country.name"
+                                    class="country-flag-img"
+                                    width="20"
+                                    height="15"
+                                />
+                                <span class="country-name">{{ country.name }}</span>
+                                <span class="country-dial">{{ country.dialCode }}</span>
                             </span>
                         </ng-template>
                     </p-select>
@@ -148,9 +160,7 @@
                         Se souvenir de moi
                     </label>
                 </div>
-                <a class="text-primary text-sm cursor-pointer hover:underline md:hidden">
-                    Mot de passe oublié ?
-                </a>
+                
             </div>
 
             <div

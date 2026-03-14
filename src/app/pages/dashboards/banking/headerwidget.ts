@@ -1,18 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
     standalone: true,
     selector: 'app-header-widget',
     imports: [ButtonModule, TooltipModule],
     template: `
-        <div class="flex flex-col sm:flex-row items-center gap-6">
+        <div class="flex flex-col sm:flex-row items-center gap-6"> 
             <div class="flex flex-col sm:flex-row items-center gap-4">
-                <img alt="avatar" src="/demo/images/avatar/circle/avatar-f-1.png" class="w-16 h-16 shrink-0" />
+                <div class="w-16 h-16 shrink-0 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl select-none">
+                    {{ initials() }}
+                </div>
                 <div class="flex flex-col items-center sm:items-start">
-                    <span class="text-surface-900 dark:text-surface-0 font-bold text-4xl">Welcome Isabel</span>
-                    <p class="text-surface-600 dark:text-surface-200 m-0">Your last login was on 04/05/2022 at 10:24 am</p>
+                    <span class="text-surface-900 dark:text-surface-0 font-bold text-4xl"> {{ fullName() }}</span>
+                    <p class="text-surface-600 dark:text-surface-200 m-0">{{ role() }}</p>
                 </div>
             </div>
             <div class="flex gap-2 sm:ml-auto">
@@ -23,4 +26,23 @@ import { TooltipModule } from 'primeng/tooltip';
         </div>
     `
 })
-export class HeaderWidget {}
+export class HeaderWidget {
+    private authService = inject(AuthService);
+
+    role = computed(() => {
+        const user = this.authService.currentUser();
+        return user?.role_names?.[0] ?? user?.roles?.[0] ?? '';
+    });
+
+    fullName = computed(() => {
+        const user = this.authService.currentUser();
+        if (!user) return '';
+        return user.nom_complet || [user.prenom, user.nom].filter(Boolean).join(' ');
+    });
+
+    initials = computed(() => {
+        const user = this.authService.currentUser();
+        if (!user) return '';
+        return [(user.prenom ?? '')[0], (user.nom ?? '')[0]].filter(Boolean).join('').toUpperCase();
+    });
+}

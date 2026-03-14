@@ -11,12 +11,12 @@ export const appRoutes: Routes = [
         canActivate: [authGuard],
         children: [
             {
-                path: '',
+                path: 'stats',
                 loadComponent: () => import('./app/pages/dashboards/ecommercedashboard').then((c) => c.EcommerceDashboard),
                 data: { breadcrumb: 'E-Commerce Dashboard' }
             },
             {
-                path: 'dashboard-banking',
+                path: '',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then((c) => c.BankingDashboard),
                 data: { breadcrumb: 'Banking Dashboard' }
             },
@@ -33,6 +33,14 @@ export const appRoutes: Routes = [
             {
                 path: 'pages',
                 loadChildren: () => import('@/app/pages/pages.routes')
+            },
+             {
+                path: 'produits',
+                loadChildren: () => import('@/app/pages/produits/produits.routes')
+            },
+             {
+                path: 'vehicules',
+                loadChildren: () => import('@/app/pages/vehicules/vehicules.routes')
             },
             {
                 path: 'apps',
@@ -53,6 +61,11 @@ export const appRoutes: Routes = [
             {
                 path: 'profile',
                 loadChildren: () => import('@/app/pages/usermanagement/usermanagement.routes')
+            },
+            {
+                path: 'produits',
+                data: { breadcrumb: 'Produits' },
+                loadChildren: () => import('@/app/pages/produits/produits.routes')
             }
         ]
     },

@@ -89,9 +89,9 @@ export class AppMenu {
                             routerLink: ['/vehicules/livreurs']
                         },
                         {
-                            label: 'Prestataires',
+                            label: 'Proprietaires',
                             icon: 'pi pi-fw pi-user',
-                            routerLink: ['/apps/cms/edit']
+                            routerLink: ['/vehicules/proprietaires']
                         }
                     ]
                 },

@@ -25,6 +25,10 @@ export default [
         path: 'livreurs',
         loadChildren: () => import('@/app/pages/vehicules/livreurs/livreurs.routes')
     },
+ {
+        path: 'proprietaires',
+        loadChildren: () => import('@/app/pages/vehicules/proprietaires/proprietaires.routes')
+    },
 
     { path: '**', redirectTo: '' },
 ] as Routes;

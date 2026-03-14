@@ -1,1 +1,166 @@
-<p>proprietaire-liste works!</p>
+<p-toast />
+
+<div class="flex flex-col bg-surface-0 dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+    <div class="px-6 py-5 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Proprietaires</h1>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <p-select
+                [ngModel]="selectedFilter()"
+                (ngModelChange)="onFilterChange($event)"
+                [options]="filterOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Tous"
+                class="w-full sm:w-[170px]"
+                appendTo="body"
+            />
+
+            <p-iconfield class="w-full sm:w-[217px]">
+                <p-inputicon styleClass="pi pi-search" />
+                <input
+                    pInputText
+                    [ngModel]="searchQuery()"
+                    (ngModelChange)="onSearchChange($event)"
+                    placeholder="Rechercher"
+                    class="w-full! py-2! rounded-xl!"
+                />
+            </p-iconfield>
+
+            @if (canCreate) {
+                <p-button
+                    icon="pi pi-plus"
+                    label="Nouveau"
+                    severity="primary"
+                    [rounded]="true"
+                    class="w-full sm:w-auto cursor-pointer"
+                    (onClick)="goNew()"
+                />
+            }
+        </div>
+    </div>
+
+    <div class="flex-1 px-6 py-5">
+        @if (loading) {
+            <div class="py-10 text-center text-surface-500 dark:text-surface-400">
+                <i class="pi pi-spin pi-spinner text-2xl mb-3 block"></i>
+                Chargement des proprietaires...
+            </div>
+        } @else {
+            <p-table
+                [value]="filteredProprietaires()"
+                [(selection)]="selectedProprietaires"
+                [paginator]="true"
+                [rows]="rows"
+                [first]="first"
+                sortMode="multiple"
+                [tableStyle]="{ width: '100%' }"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+                currentPageReportTemplate="Shows {first} to {last} of {totalRecords} results"
+                class="bg-surface-0 dark:bg-surface-800 overflow-hidden"
+                [pt]="{ pcPaginator: { root: { class: 'rounded-none!' } } }"
+            >
+                <ng-template #header>
+                    <tr>
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox />
+                        </th>
+                        <th pSortableColumn="name">
+                            <span class="flex items-center gap-2">Nom <p-sortIcon field="name" /></span>
+                        </th>
+                        <th pSortableColumn="phone">
+                            <span class="flex items-center gap-2">Telephone <p-sortIcon field="phone" /></span>
+                        </th>
+                        <th pSortableColumn="email">
+                            <span class="flex items-center gap-2">Email <p-sortIcon field="email" /></span>
+                        </th>
+                        <th pSortableColumn="ville">
+                            <span class="flex items-center gap-2">Adresse <p-sortIcon field="ville" /></span>
+                        </th>
+                        <th pSortableColumn="pays">
+                            <span class="flex items-center gap-2">Pays <p-sortIcon field="pays" /></span>
+                        </th>
+                        <th pSortableColumn="statusLabel">
+                            <span class="flex items-center gap-2">Statut <p-sortIcon field="statusLabel" /></span>
+                        </th>
+                        <th style="width: 6rem">Actions</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template #body let-proprietaire>
+                    <tr>
+                        <td style="width: 3rem">
+                            <p-tableCheckbox [value]="proprietaire" />
+                        </td>
+
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-100 text-xs font-semibold flex items-center justify-center">
+                                    {{ getInitials(proprietaire.name) }}
+                                </div>
+                                <span class="text-surface-950 dark:text-surface-0 text-sm font-medium leading-tight">
+                                    {{ proprietaire.name }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
+                                {{ proprietaire.phone | phoneFormat }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
+                                {{ proprietaire.email || '-' }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="text-surface-700 dark:text-surface-300 text-sm font-medium leading-tight">
+                                {{ proprietaire.ville || '-' }}
+                            </div>
+                            <div class="text-surface-500 dark:text-surface-400 text-xs leading-tight">
+                                {{ proprietaire.quartier || '-' }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
+                                {{ proprietaire.pays || '-' }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <p-tag
+                                [value]="proprietaire.statusLabel"
+                                [severity]="getStatusSeverity(proprietaire.statusLabel)"
+                                class="px-2 py-1 rounded-[6px]"
+                            />
+                        </td>
+
+                        <td>
+                            @if (canUpdate || canDelete) {
+                                <div class="flex items-center gap-1">
+                                    <p-button
+                                        (onClick)="toggleMenu($event, proprietaire.id)"
+                                        [rounded]="true"
+                                        [text]="true"
+                                        icon="pi pi-ellipsis-h"
+                                        size="small"
+                                        severity="secondary"
+                                        class="cursor-pointer"
+                                    />
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        }
+
+        <p-menu #actionMenu [model]="menuItems()" [popup]="true" styleClass="w-48!" appendTo="body" />
+    </div>
+
+    <p-confirmdialog [style]="{ width: '450px' }" />
+</div>

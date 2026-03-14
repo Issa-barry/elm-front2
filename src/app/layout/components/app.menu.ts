@@ -49,7 +49,7 @@ export class AppMenu {
                         {
                             label: 'Prestataires',
                             icon: 'pi pi-fw pi-users',
-                            routerLink: ['/apps/cms/detail']
+                            routerLink: ['/contacts/prestataires']
                         },
                         {
                             label: 'Utilisateurs',

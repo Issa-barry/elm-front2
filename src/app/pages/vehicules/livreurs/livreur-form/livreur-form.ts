@@ -184,20 +184,26 @@ export class LivreurForm implements OnInit {
       : this.livreurService.create(payload);
 
     req$.subscribe({
-      next: () => {
+      next: (response) => {
         if (this.isEditMode && this.livreur) {
           this.reloadEditedLivreur(this.livreur.id);
           return;
         }
 
         this.loading = false;
+        const createdId = response?.data?.id;
+        if (createdId) {
+          this.router.navigate(['/vehicules/livreurs/edit', createdId]);
+          return;
+        }
+
         this.messageService.add({
-          severity: 'success',
-          summary: 'Succes',
-          detail: 'Livreur cree.',
-          life: 3000,
+          severity: 'warn',
+          summary: 'Creation terminee',
+          detail: "Livreur cree, mais l'identifiant est introuvable pour ouvrir l'edition.",
+          life: 4000,
         });
-        setTimeout(() => this.router.navigate(['/vehicules/livreurs']), 1200);
+        this.router.navigate(['/vehicules/livreurs']);
       },
       error: (err) => {
         this.loading = false;

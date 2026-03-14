@@ -5,6 +5,18 @@
         <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Proprietaires</h1>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+           
+            <p-iconfield class="w-full sm:w-[217px]">
+                <p-inputicon styleClass="pi pi-search" />
+                <input
+                    pInputText
+                    [ngModel]="searchQuery()"
+                    (ngModelChange)="onSearchChange($event)"
+                    placeholder="Rechercher"
+                    class="w-full! py-2! rounded-xl!"
+                />
+            </p-iconfield>
+            
             <p-select
                 [ngModel]="selectedFilter()"
                 (ngModelChange)="onFilterChange($event)"
@@ -16,16 +28,7 @@
                 appendTo="body"
             />
 
-            <p-iconfield class="w-full sm:w-[217px]">
-                <p-inputicon styleClass="pi pi-search" />
-                <input
-                    pInputText
-                    [ngModel]="searchQuery()"
-                    (ngModelChange)="onSearchChange($event)"
-                    placeholder="Rechercher"
-                    class="w-full! py-2! rounded-xl!"
-                />
-            </p-iconfield>
+           
 
             @if (canCreate) {
                 <p-button

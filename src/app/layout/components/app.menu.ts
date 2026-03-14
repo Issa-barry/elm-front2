@@ -41,6 +41,12 @@ export class AppMenu {
             icon: 'pi pi-th-large',
             path: '/apps',
             items: [
+                
+                {
+                    label: 'Packing',
+                    icon: 'pi pi-fw pi-box',
+                    routerLink: ['/packings']
+                },
                {
                     label: 'Contacts',
                     icon: 'pi pi-fw pi-address-book',
@@ -60,18 +66,7 @@ export class AppMenu {
                     ]
                 },
 
-                {
-                    label: 'Packing',
-                    icon: 'pi pi-fw pi-box',
-                    routerLink: ['/apps/chat']
-                },
-                {
-                    label: 'Produits',
-                    icon: 'pi pi-fw pi-barcode',
-                    routerLink: ['/produits']
-                },
-
-              
+               
                  {
                     label: 'Véhicules',
                     icon: 'pi pi-fw pi-car',
@@ -95,6 +90,13 @@ export class AppMenu {
                         }
                     ]
                 },
+                 {
+                    label: 'Produits',
+                    icon: 'pi pi-fw pi-barcode',
+                    routerLink: ['/produits']
+                },
+
+              
             ]
         },
         // {

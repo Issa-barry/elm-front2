@@ -101,9 +101,11 @@
                         </td>
 
                         <td>
-                            <span class="text-surface-700 dark:text-surface-300 text-sm font-medium leading-tight">
-                                {{ getTypeLabel(prestataire) }}
-                            </span>
+                            <p-tag
+                                [value]="getTypeLabel(prestataire)"
+                                [severity]="getTypeSeverity(prestataire)"
+                                class="px-2 py-1 rounded-[8px]"
+                            />
                         </td>
 
                         <td>

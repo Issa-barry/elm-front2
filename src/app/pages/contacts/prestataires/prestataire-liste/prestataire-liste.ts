@@ -269,6 +269,18 @@ export class PrestataireListe implements OnInit {
     return PRESTATAIRE_TYPES.find((item) => item.value === prestataire.type)?.label ?? prestataire.type;
   }
 
+  getTypeSeverity(prestataire: Prestataire): StatusSeverity {
+    const type = (prestataire.type ?? '').toLowerCase();
+    const label = (prestataire.type_label ?? '').toLowerCase();
+    const source = `${type} ${label}`;
+
+    if (source.includes('machin')) return 'info';
+    if (source.includes('mecan')) return 'warn';
+    if (source.includes('consult')) return 'success';
+    if (source.includes('fourn')) return 'danger';
+    return 'secondary';
+  }
+
   getAddressLabel(prestataire: Prestataire): string {
     if (prestataire.adresse && prestataire.adresse.trim()) {
       return prestataire.adresse;

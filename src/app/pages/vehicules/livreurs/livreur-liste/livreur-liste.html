@@ -4,9 +4,26 @@
                 <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Livreurs</h1>
 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <p-select
+                        [ngModel]="selectedFilter()"
+                        (ngModelChange)="onFilterChange($event)"
+                        [options]="filterOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Tous"
+                        class="w-full sm:w-[170px]"
+                        appendTo="body"
+                    />
+
                     <p-iconfield class="w-full sm:w-[217px]">
                         <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText [(ngModel)]="searchValue" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher" class="w-full! py-2! rounded-xl!" />
+                        <input
+                            pInputText
+                            [ngModel]="searchValue()"
+                            (ngModelChange)="onSearchChange($event)"
+                            placeholder="Rechercher"
+                            class="w-full! py-2! rounded-xl!"
+                        />
                     </p-iconfield>
 
                     <p-button icon="pi pi-plus" label="Nouveau" severity="primary" [rounded]="true" class="w-full sm:w-auto cursor-pointer" (onClick)="addNewUser()" />
@@ -16,8 +33,7 @@
             <!-- Table -->
             <div class="flex-1 px-6 py-5">
                 <p-table
-                    #dt
-                    [value]="users()"
+                    [value]="filteredUsers()"
                     [(selection)]="selectedUsers"
                     [paginator]="true"
                     [rows]="rows"
@@ -26,7 +42,6 @@
                     [tableStyle]="{ width: '100%' }"
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
                     currentPageReportTemplate="Shows {first} to {last} of {totalRecords} results"
-                    [globalFilterFields]="['name', 'role', 'department', 'joinDate', 'authorizationLevel', 'status']"
                     class="bg-surface-0 dark:bg-surface-800 overflow-hidden"
                     [pt]="{ pcPaginator: { root: { class: 'rounded-none!' } } }"
                 >

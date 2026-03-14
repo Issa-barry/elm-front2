@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -19,6 +19,7 @@ import { LivreurService } from '@/services/livreurs/livreur.service';
 import { PhoneFormatPipe } from '@/app/pipes/phone-format.pipe';
 
 type StatusSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined;
+type LivreurFilter = 'all' | 'actif' | 'inactif';
 
 interface LivreurRow extends Livreur {
     name: string;
@@ -55,9 +56,23 @@ export class LivreurListe implements OnInit {
     @ViewChild('actionMenu') actionMenu!: Menu;
 
     users = signal<LivreurRow[]>([]);
+    filteredUsers = computed(() => {
+        const query = this.searchValue().trim().toLowerCase();
+        if (!query) {
+            return this.users();
+        }
+
+        return this.users().filter((user) => this.matchesSearch(user, query));
+    });
+    selectedFilter = signal<LivreurFilter>('all');
+    filterOptions: { label: string; value: LivreurFilter }[] = [
+        { label: 'Tous', value: 'all' },
+        { label: 'Actifs', value: 'actif' },
+        { label: 'Inactifs', value: 'inactif' },
+    ];
 
     selectedUsers: LivreurRow[] = [];
-    searchValue = '';
+    searchValue = signal('');
     first = 0;
     rows = 8;
     selectedUserId = signal<number | null>(null);
@@ -110,7 +125,10 @@ export class LivreurListe implements OnInit {
     }
 
     load(): void {
-        this.livreurService.getAll().subscribe({
+        const filter = this.selectedFilter();
+        const statut = filter === 'all' ? undefined : filter;
+
+        this.livreurService.getAll(statut).subscribe({
             next: (resp) => {
                 const rows = (resp.data?.data ?? []).map((livreur) => this.toRow(livreur));
                 this.users.set(rows);
@@ -121,13 +139,20 @@ export class LivreurListe implements OnInit {
         });
     }
 
+    onFilterChange(value: LivreurFilter): void {
+        this.selectedFilter.set(value);
+        this.first = 0;
+        this.load();
+    }
+
+    onSearchChange(value: string): void {
+        this.searchValue.set(value ?? '');
+        this.first = 0;
+    }
+
     toggleMenu(event: Event, userId: number): void {
         this.selectedUserId.set(userId);
         this.actionMenu.toggle(event);
-    }
-
-    onGlobalFilter(table: Table, event: Event): void {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
     getStatusSeverity(status: string): StatusSeverity {
@@ -207,6 +232,25 @@ export class LivreurListe implements OnInit {
     private isLivreurActive(livreur: Livreur): boolean {
         const value = (livreur as { is_active: unknown }).is_active;
         return value === true || value === 1 || value === '1';
+    }
+
+    private matchesSearch(user: LivreurRow, query: string): boolean {
+        const raw = [
+            user.name,
+            user.prenom,
+            user.nom,
+            user.phone,
+            user.status,
+            this.formatDate(user.created_at),
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+        const normalizedRaw = raw.replace(/\s+/g, '');
+        const normalizedQuery = query.replace(/\s+/g, '');
+
+        return raw.includes(query) || normalizedRaw.includes(normalizedQuery);
     }
 
     // Compatibilité avec d'anciens appels potentiels.

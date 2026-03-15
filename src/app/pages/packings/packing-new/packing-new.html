@@ -1,0 +1,12 @@
+<p-toast />
+
+<app-packing-form
+  mode="create"
+  [prestataires]="prestataires"
+  [loading]="saving"
+  [loadingPrestataires]="loadingPrestataires"
+  [loadingPrixRouleau]="loadingPrixRouleau"
+  [defaultPrixRouleau]="defaultPrixRouleau"
+  (submitForm)="onSubmit($event)"
+  (cancel)="onCancel()"
+/>

@@ -1,0 +1,10 @@
+<p-toast />
+<app-produit-form
+    mode="edit"
+    [loading]="loading"
+    [initialProduit]="produit"
+    (submitForm)="onSubmitForm($event)"
+    (uploadImage)="onUploadImage($event)"
+    (deleteImage)="onDeleteImage()"
+    (cancel)="onCancel()"
+/>

@@ -1,0 +1,292 @@
+<p-dialog
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [style]="{ width: '760px', 'max-width': '96vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="!saving"
+  styleClass="utilisateurs-mobile-first-dialog"
+  maskStyleClass="utilisateurs-mobile-first-mask"
+  appendTo="body"
+  (onShow)="onDialogShow()"
+>
+  <ng-template #header>
+    <div class="dialog-header">
+      <h3 class="dialog-title">{{ dialogHeader }}</h3>
+      <p class="dialog-subtitle" *ngIf="mode === 'create'">Creation rapide sans etapes.</p>
+      <p class="dialog-subtitle" *ngIf="mode === 'edit' && loadedUser">{{ loadedUser.nom_complet }}</p>
+    </div>
+  </ng-template>
+
+  <div *ngIf="loading" class="dialog-loading">
+    <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
+  </div>
+
+  <form *ngIf="!loading" (ngSubmit)="save()" class="dialog-form" autocomplete="off" novalidate>
+    <div class="grid grid-cols-12 gap-4 mb-6">
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="type" class="field-label">Type de compte <span class="required-star">*</span></label>
+        <p-select
+          id="type"
+          name="type"
+          [options]="userTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.type"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          (onChange)="onTypeChange()"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="role" class="field-label">Role <span class="required-star">*</span></label>
+        <p-select
+          id="role"
+          name="role"
+          [options]="roleOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.role"
+          [appendTo]="'body'"
+          [disabled]="saving || !isStaffType"
+          styleClass="w-full"
+        ></p-select>
+        <small *ngIf="submitted && !model.role" class="field-error">Role obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="organisation_id" class="field-label">Organisation <span class="optional-hint">(facultatif)</span></label>
+        <p-select
+          id="organisation_id"
+          name="organisation_id"
+          [options]="organisationOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.organisation_id"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          (onChange)="onOrganisationChange()"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="site_id" class="field-label">Site <span class="required-star">*</span></label>
+        <p-select
+          id="site_id"
+          name="site_id"
+          [options]="siteOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.site_id"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          (onChange)="onSiteChange()"
+          styleClass="w-full"
+        ></p-select>
+        <small *ngIf="submitted && mode === 'create' && !model.site_id" class="field-error">Site obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="nom" class="field-label">Nom <span class="required-star">*</span></label>
+        <input
+          id="nom"
+          name="nom"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.nom"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.nom.trim()" class="field-error">Nom obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="prenom" class="field-label">Prenom <span class="required-star">*</span></label>
+        <input
+          id="prenom"
+          name="prenom"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.prenom"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.prenom.trim()" class="field-error">Prenom obligatoire.</small>
+      </div>
+
+      
+      <div class="col-span-12 md:col-span-12 mb-4">
+        <label for="email" class="field-label">Email <span class="optional-hint">(facultatif)</span></label>
+        <input
+          id="email"
+          name="contact_email"
+          type="email"
+          autocomplete="off"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.email"
+          [disabled]="saving"
+          placeholder="exemple@email.com"
+        />
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="code_pays" class="field-label">Pays <span class="required-star">*</span></label>
+        <p-select
+          id="code_pays"
+          name="code_pays"
+          [options]="countries"
+          optionLabel="name"
+          optionValue="code"
+          [(ngModel)]="model.code_pays"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          (onChange)="onCountryChange()"
+          styleClass="w-full"
+        >
+          <ng-template #item let-country>
+            <div class="country-option">
+              <img [src]="country.flag" [alt]="country.code" class="country-flag" />
+              <span class="country-name">{{ country.name }}</span>
+              <span class="country-code">{{ country.dialCode }}</span>
+            </div>
+          </ng-template>
+          <ng-template #selectedItem let-country>
+            <div class="country-option" *ngIf="country">
+              <img [src]="country.flag" [alt]="country.code" class="country-flag" />
+              <span class="country-name">{{ country.name }}</span>
+              <span class="country-code">{{ country.dialCode }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+        <small *ngIf="submitted && !model.code_pays" class="field-error">Pays obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="phone" class="field-label">Telephone <span class="required-star">*</span></label>
+        <input
+          id="phone"
+          name="phone"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.phone"
+          [disabled]="saving"
+          placeholder="622000000"
+          (blur)="onPhoneBlur()"
+        />
+        <small *ngIf="submitted && !model.phone.trim()" class="field-error">Telephone obligatoire.</small>
+        <small *ngIf="phonePrefixError" class="field-error">{{ phonePrefixError }}</small>
+      </div>
+
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="ville" class="field-label">Ville <span class="required-star">*</span></label>
+        <input
+          id="ville"
+          name="ville"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.ville"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.ville.trim()" class="field-error">Ville obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="quartier" class="field-label">Quartier <span class="required-star">*</span></label>
+        <input
+          id="quartier"
+          name="quartier"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.quartier"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.quartier.trim()" class="field-error">Quartier obligatoire.</small>
+      </div>
+
+      <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6 mb-4">
+        <label for="civilite" class="field-label">Civilite <span class="optional-hint">(facultatif)</span></label>
+        <p-select
+          id="civilite"
+          name="civilite"
+          [options]="civiliteOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.civilite"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+      <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6 mb-4">
+        <label for="date_naissance" class="field-label">Date de naissance <span class="optional-hint">(facultatif)</span></label>
+        <input
+          id="date_naissance"
+          name="date_naissance"
+          type="date"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.date_naissance"
+          [disabled]="saving"
+        />
+      </div>
+
+      <div *ngIf="mode === 'create'" class="col-span-12 mb-4">
+        <label for="password" class="field-label">Mot de passe <span class="required-star">*</span></label>
+        <p-password
+          id="password"
+          name="new_user_password"
+          autocomplete="new-password"
+          [(ngModel)]="model.password"
+          [toggleMask]="true"
+          [feedback]="false"
+          [disabled]="saving"
+          inputStyleClass="w-full"
+          styleClass="w-full"
+        ></p-password>
+      </div>
+    </div>
+
+    <div *ngIf="formError" class="form-error-box">
+      <div>{{ formError }}</div>
+      <ul *ngIf="additionalFormErrors.length" class="form-error-list">
+        <li *ngFor="let errorItem of additionalFormErrors">{{ errorItem }}</li>
+      </ul>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2 dialog-footer-actions">
+      <button
+        pButton
+        type="button"
+        label="Annuler"
+        class="p-button-text"
+        icon="pi pi-times"
+        [disabled]="saving"
+        (click)="close()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        [label]="mode === 'create' ? 'Creer' : 'Enregistrer'"
+        icon="pi pi-check"
+        [loading]="saving"
+        [disabled]="loading || saving"
+        (click)="save()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,334 @@
+:host {
+  display: block;
+}
+
+.vehicules-mobile-app {
+  display: none;
+}
+
+@media screen and (min-width: 769px) {
+  .vehicule-primary-col {
+    flex: 1.35;
+  }
+
+  .vehicule-meta-col {
+    flex: 1;
+  }
+
+  .vehicule-photo-col {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vehicule-photo-lg {
+    width: 5.75rem;
+    height: 3.75rem;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    background: var(--p-surface-100);
+    border: 1px solid var(--p-surface-200);
+    padding: 0.125rem;
+    display: block;
+  }
+
+  .vehicule-photo-fallback {
+    width: 5.75rem;
+    height: 3.75rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #5f6bff 0%, #7c8aff 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  :host-context(.app-dark) {
+    .vehicule-photo-lg {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    --mobile-primary: #5f6bff;
+    --mobile-text: #334155;
+    --mobile-muted: #7f8ca3;
+    --mobile-card: #ffffff;
+    --mobile-border: #e2e8f0;
+  }
+
+  .vehicules-desktop {
+    display: none;
+  }
+
+  .vehicules-mobile-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    margin-top: calc(-0.25rem - env(safe-area-inset-top));
+    margin-left: -0.875rem;
+    margin-right: -0.875rem;
+    margin-bottom: calc(-0.875rem - env(safe-area-inset-bottom));
+    padding: 0 0.875rem env(safe-area-inset-bottom);
+    padding-left: calc(0.875rem + env(safe-area-inset-left));
+    padding-right: calc(0.875rem + env(safe-area-inset-right));
+    background: #f8fafc;
+    animation: mobileFade 0.24s ease-out;
+  }
+
+  .mobile-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 -0.875rem 0;
+    padding: calc(0.5rem + env(safe-area-inset-top)) calc(0.875rem + env(safe-area-inset-right)) 0.6rem
+      calc(0.875rem + env(safe-area-inset-left));
+    background: var(--mobile-card);
+    border-bottom: 1px solid var(--mobile-border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .mobile-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 0.75rem;
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  .mobile-back,
+  .mobile-add {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: var(--mobile-primary) !important;
+    background: rgba(95, 107, 255, 0.1) !important;
+  }
+
+  .mobile-title-wrap {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .mobile-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--mobile-text);
+  }
+
+  .mobile-subtitle {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--mobile-muted);
+  }
+
+  .mobile-search {
+    background: var(--mobile-card);
+    border: 1px solid var(--mobile-border);
+    border-radius: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .mobile-search .p-iconfield,
+  .mobile-search .p-inputtext {
+    width: 100%;
+  }
+
+  .mobile-search .p-inputtext {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    font-size: 0.95rem;
+  }
+
+  .mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  :host ::ng-deep .mobile-vehicule-card {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    background: var(--mobile-card);
+    border: 1px solid var(--mobile-border);
+    border-radius: 0.875rem;
+    padding: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+
+    &:active {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  :host ::ng-deep .mobile-card-avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--mobile-primary) 0%, #7c8aff 100%);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :host ::ng-deep .mobile-card-avatar-img {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  :host ::ng-deep .mobile-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  :host ::ng-deep .mobile-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mobile-text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :host ::ng-deep .mobile-card-meta {
+    font-size: 0.85rem;
+    color: var(--mobile-muted);
+    margin-top: 0.2rem;
+  }
+
+  :host ::ng-deep .mobile-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  :host ::ng-deep .mobile-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .p-button {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  :host ::ng-deep .mobile-status-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+  }
+
+  .mobile-state {
+    margin-top: 1rem;
+    background: var(--mobile-card);
+    border: 1px dashed var(--mobile-border);
+    border-radius: 0.875rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--mobile-muted);
+    font-size: 0.9rem;
+  }
+
+  .mobile-fab {
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    right: calc(1rem + env(safe-area-inset-right));
+    z-index: 25;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--mobile-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(95, 107, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    .pi {
+      font-size: 1.35rem;
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+
+  :host-context(.app-dark) {
+    :host {
+      --mobile-primary: var(--p-primary-400);
+      --mobile-text: var(--p-surface-100);
+      --mobile-muted: var(--p-surface-400);
+      --mobile-card: var(--p-surface-800);
+      --mobile-border: var(--p-surface-600);
+    }
+
+    .vehicules-mobile-app {
+      background: var(--p-surface-950);
+    }
+
+    .mobile-header {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    :host ::ng-deep .mobile-vehicule-card:active {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .mobile-state {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+      color: var(--p-surface-400);
+    }
+  }
+}
+
+@keyframes mobileFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

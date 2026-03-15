@@ -1,0 +1,152 @@
+<p-toast />
+
+<div class="card livreur-form">
+  <header class="mobile-lf-header">
+    <button
+      pButton pRipple type="button"
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-lf-back"
+      aria-label="Retour"
+      (click)="onCancel()"
+    ></button>
+    <div class="mobile-lf-title-wrap">
+      <h1 class="mobile-lf-title">{{ isEditMode ? 'Modifier le livreur' : 'Nouveau livreur' }}</h1>
+    </div>
+    <div style="width:2.25rem;flex-shrink:0"></div>
+  </header>
+
+  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block lf-desktop-title">
+    {{ isEditMode ? 'Modifier le livreur' : 'Nouveau livreur' }}
+  </span>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="lf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="lf-section-label col-span-12 lg:col-span-2">
+        <div class="lf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Identite</div>
+        <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">Informations du livreur.</p>
+      </div>
+      <div class="col-span-12 lg:col-span-10">
+        <div class="grid grid-cols-12 gap-4">
+          <div class="lf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="lf-label font-medium text-surface-900 dark:text-surface-0">
+              Prenom <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              fluid
+              formControlName="prenom"
+              placeholder="ex : Ibrahima"
+              [class.ng-invalid]="isInvalid('prenom')"
+              [class.ng-dirty]="isInvalid('prenom')"
+            />
+            @if (isInvalid('prenom')) {
+              <small class="text-red-500">Prenom requis.</small>
+            }
+          </div>
+
+          <div class="lf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="lf-label font-medium text-surface-900 dark:text-surface-0">
+              Nom <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              fluid
+              formControlName="nom"
+              placeholder="ex : Sylla"
+              [class.ng-invalid]="isInvalid('nom')"
+              [class.ng-dirty]="isInvalid('nom')"
+            />
+            @if (isInvalid('nom')) {
+              <small class="text-red-500">Nom requis.</small>
+            }
+          </div>
+
+          <div class="mb-4 col-span-12 grid grid-cols-12 gap-3">
+            <div class="lf-field col-span-12 md:col-span-4 flex flex-col gap-1">
+              <label class="lf-label font-medium text-surface-900 dark:text-surface-0">
+                Pays <span class="text-red-500">*</span>
+              </label>
+              <p-select
+                [(ngModel)]="phoneCountry"
+                [ngModelOptions]="{ standalone: true }"
+                [options]="countries"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Pays"
+                (onChange)="onCountryChange()"
+                styleClass="w-full"
+              >
+                <ng-template #item let-c>
+                  <div class="flex items-center gap-2">
+                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                    <span class="text-sm">{{ c.name }}</span>
+                  </div>
+                </ng-template>
+                <ng-template #selectedItem let-c>
+                  <div class="flex items-center gap-2" *ngIf="c">
+                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                    <span class="text-sm">{{ c.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <div class="lf-field col-span-12 md:col-span-8 flex flex-col gap-1">
+              <label class="lf-label font-medium text-surface-900 dark:text-surface-0">
+                Telephone <span class="text-red-500">*</span>
+              </label>
+              <input
+                pInputText
+                fluid
+                formControlName="phone"
+                type="tel"
+                placeholder="ex : 622 00 00 00"
+                (input)="onPhoneInput()"
+                (blur)="onPhoneBlur()"
+                [class.ng-invalid]="isInvalid('phone') || !!phoneError"
+                [class.ng-dirty]="isInvalid('phone') || !!phoneError"
+              />
+              @if (isInvalid('phone') && !phoneError) {
+                <small class="text-red-500">Telephone requis.</small>
+              }
+              @if (phoneError) {
+                <small class="text-red-500">{{ phoneError }}</small>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (isEditMode) {
+      <div class="lf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+        <div class="lf-section-label col-span-12 lg:col-span-2">
+          <div class="lf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Statut</div>
+          <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">
+            Activer ou desactiver ce livreur.
+          </p>
+        </div>
+        <div class="col-span-12 lg:col-span-10 flex items-center gap-3">
+          <p-toggleswitch formControlName="is_active" inputId="is_active" />
+          <label for="is_active" class="cursor-pointer text-sm font-medium text-surface-900 dark:text-surface-0">
+            {{ form.get('is_active')?.value ? 'Actif' : 'Inactif' }}
+          </label>
+        </div>
+      </div>
+    }
+
+    <div class="lf-actions flex gap-2 justify-end">
+      <button pButton pRipple type="button" text label="Annuler" (click)="onCancel()" [disabled]="loading"></button>
+      <button
+        pButton
+        pRipple
+        type="submit"
+        [label]="isEditMode ? 'Enregistrer' : 'Creer le livreur'"
+        icon="pi pi-check"
+        [loading]="loading"
+      ></button>
+    </div>
+  </form>
+</div>

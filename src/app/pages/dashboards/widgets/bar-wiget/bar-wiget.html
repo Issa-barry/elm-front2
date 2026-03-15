@@ -1,0 +1,32 @@
+<div class="card h-full w-full">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h2 class="text-xl font-semibold text-surface-900 dark:text-surface-0 m-0">Evolution CA Payees vs Impayees</h2>
+        <p-select
+            [options]="periodOptions"
+            [ngModel]="selectedPeriod()"
+            (ngModelChange)="onPeriodChange($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="w-full sm:w-[180px]"
+        />
+    </div>
+
+    @if (loading()) {
+        <div class="flex justify-center items-center bar-chart-wrap">
+            <p-progressSpinner strokeWidth="4" />
+        </div>
+    } @else if (error()) {
+        <div class="bar-chart-wrap flex items-center justify-center">
+            <p class="text-red-500 text-center m-0">{{ error() }}</p>
+        </div>
+    } @else if (chartData()) {
+        <div class="bar-chart-wrap">
+            <p-chart type="bar" [data]="chartData()!" [options]="chartOptions()"></p-chart>
+        </div>
+    } @else {
+        <div class="bar-chart-wrap flex items-center justify-center">
+            <p class="text-surface-500 text-center m-0">Aucune donnee disponible.</p>
+        </div>
+    }
+</div>

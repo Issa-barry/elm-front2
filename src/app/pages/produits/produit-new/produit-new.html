@@ -1,0 +1,7 @@
+<p-toast />
+<app-produit-form
+    mode="create"
+    [loading]="loading"
+    (submitForm)="onSubmitForm($event)"
+    (cancel)="onCancel()"
+/>

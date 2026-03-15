@@ -1,0 +1,224 @@
+<div class="card packing-from-card">
+  @if (loading) {
+    <div class="pfr-loading-overlay">
+      <i class="pi pi-spin pi-spinner text-xl"></i>
+      <span>{{ mode === 'create' ? 'Creation...' : 'Enregistrement...' }}</span>
+    </div>
+  }
+
+  <header class="mobile-pfr-header">
+    <button
+      pButton
+      pRipple
+      type="button"
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-pfr-back"
+      aria-label="Retour"
+      (click)="onCancel()" 
+    ></button>
+    <div class="mobile-pfr-title-wrap">
+      <h1 class="mobile-pfr-title">{{ mode === 'create' ? 'Nouveau packing' : 'Modifier le packing' }}</h1>
+    </div>
+    @if (mode === 'edit' && !isEditing) {
+      <button
+        pButton
+        pRipple
+        type="button"
+        icon="pi pi-pencil"
+        class="p-button-rounded p-button-text mobile-pfr-edit"
+        aria-label="Modifier"
+        (click)="enableEditing()"
+      ></button>
+    } @else {
+      <div style="width: 2.25rem; flex-shrink: 0"></div>
+    }
+  </header>
+
+  <div class="pfr-desktop-title-row mb-6">
+    <h2 class="text-surface-900 dark:text-surface-0 text-xl font-bold m-0 pfr-desktop-title">
+      {{ mode === 'create' ? 'Nouveau packing' : 'Modifier le packing' }}
+    </h2>
+    @if (mode === 'edit' && !isEditing) {
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Modifier"
+        icon="pi pi-pencil"
+        severity="secondary"
+        class="w-auto"
+        (click)="enableEditing()"
+      ></button>
+    }
+  </div>
+
+  <form (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)" class="pfr-form flex flex-col gap-5">
+    <div class="pfr-section border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+      <div class="pfr-section-header px-5 py-3 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+        <span class="pfr-section-title text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Prestataire</span>
+      </div>
+      <div class="px-5 py-5 pfr-field flex flex-col gap-1.5">
+        <label class="pfr-label text-sm font-medium text-surface-700 dark:text-surface-300">
+          Machiniste <span class="text-red-500">*</span>
+        </label>
+        @if (loadingPrestataires) {
+          <div class="pfr-input-skeleton">
+            <p-skeleton styleClass="w-full" height="2.7rem" borderRadius="0.5rem" />
+            <small class="text-surface-400 text-xs mt-1">Chargement des machinistes...</small>
+          </div>
+        } @else {
+          <p-select
+            [(ngModel)]="model.prestataire_id"
+            name="prestataire_id"
+            [options]="filteredPrestataires"
+            optionLabel="nom_complet"
+            optionValue="id"
+            placeholder="Selectionner un machiniste"
+            [filter]="true"
+            filterBy="nom,prenom,nom_complet,phone"
+            [showClear]="true"
+            [disabled]="fieldsDisabled"
+            styleClass="w-full"
+            appendTo="body"
+          >
+            <ng-template #item let-p>
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold text-xs flex-shrink-0"
+                  style="width: 2rem; height: 2rem"
+                >
+                  {{ p.prenom?.[0] || '' }}{{ p.nom?.[0] || '' }}
+                </span>
+                <div>
+                  <div class="font-medium text-sm">{{ p.prenom }} {{ p.nom }}</div>
+                  <div class="text-xs text-surface-500">{{ p.phone | phoneFormat }}</div>
+                </div>
+              </div>
+            </ng-template>
+          </p-select>
+        }
+        @if (submitted && !model.prestataire_id) {
+          <small class="text-red-500 text-xs">Veuillez selectionner un machiniste.</small>
+        }
+      </div>
+    </div>
+
+    <div class="pfr-section border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+      <div class="pfr-section-header px-5 py-3 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+        <span class="pfr-section-title text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Details</span>
+      </div>
+      <div class="px-5 py-5 flex flex-col gap-5">
+        <div class="pfr-field flex flex-col gap-1.5">
+          <label class="pfr-label text-sm font-medium text-surface-700 dark:text-surface-300">
+            Date <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            [(ngModel)]="model.date"
+            name="date"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Selectionner la date"
+            [disabled]="fieldsDisabled"
+            (onSelect)="onDateChange()"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            appendTo="body"
+          />
+          @if (submitted && dateError) {
+            <small class="text-red-500 text-xs">{{ dateError }}</small>
+          }
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="pfr-field col-span-1 flex flex-col gap-1.5">
+            <label class="pfr-label text-sm font-medium text-surface-700 dark:text-surface-300">
+              Rouleaux <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              [(ngModel)]="model.nb_rouleaux"
+              name="nb_rouleaux"
+              (ngModelChange)="onPrixOrQuantityChange()"
+              [showButtons]="false"
+              [min]="1"
+              [max]="9999"
+              placeholder="0"
+              [useGrouping]="false"
+              [disabled]="fieldsDisabled"
+              styleClass="w-full"
+              inputStyleClass="w-full text-center"
+            />
+            @if (submitted && (!model.nb_rouleaux || model.nb_rouleaux < 1)) {
+              <small class="text-red-500 text-xs">Requis.</small>
+            }
+          </div>
+
+          <div class="pfr-field col-span-2 flex flex-col gap-1.5">
+            <label class="pfr-label text-sm font-medium text-surface-700 dark:text-surface-300">
+              Prix / rouleau (GNF) <span class="text-red-500">*</span>
+            </label>
+            @if (loadingPrixRouleau && mode === 'create') {
+              <p-skeleton styleClass="w-full" height="2.7rem" borderRadius="0.5rem" />
+            } @else {
+              <p-inputnumber
+                [(ngModel)]="model.prix_par_rouleau"
+                name="prix_par_rouleau"
+                (ngModelChange)="onPrixOrQuantityChange()"
+                [min]="0"
+                placeholder="0"
+                [useGrouping]="true"
+                [disabled]="fieldsDisabled"
+                styleClass="w-full"
+              />
+            }
+            @if (submitted && (!model.prix_par_rouleau || model.prix_par_rouleau <= 0)) {
+              <small class="text-red-500 text-xs">Requis.</small>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (mode === 'edit') {
+      <div class="pfr-section border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+        <div class="pfr-section-header px-5 py-3 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+          <span class="pfr-section-title text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Statut</span>
+        </div>
+        <div class="px-5 py-5 pfr-field flex flex-col gap-1.5">
+          <label class="pfr-label text-sm font-medium text-surface-700 dark:text-surface-300">Statut du packing</label>
+          <div class="w-full rounded-md border border-surface-300 dark:border-surface-600 bg-surface-100 dark:bg-surface-800 px-3 py-2 text-surface-700 dark:text-surface-200">
+            {{ statutLabel }}
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="pfr-actions">
+      <div class="pfr-montant-row">
+        <div class="pfr-montant-left">
+          <div class="pfr-montant-icon">
+            <i class="pi pi-money-bill"></i>
+          </div>
+          <div>
+            <div class="pfr-montant-label">Montant total</div>
+            <div class="pfr-montant-value">{{ model.montant | money }}</div>
+          </div>
+        </div>
+        @if (model.nb_rouleaux && model.prix_par_rouleau) {
+          <div class="pfr-montant-calc">{{ model.nb_rouleaux }} x {{ model.prix_par_rouleau | number: '1.0-0' }}</div>
+        }
+      </div>
+
+      @if (mode === 'create' || isEditing) {
+        <button
+          type="submit"
+          pButton
+          pRipple
+          [disabled]="loading"
+          [loading]="loading"
+          [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+          icon="pi pi-check"
+        ></button>
+      }
+    </div>
+  </form>
+</div>

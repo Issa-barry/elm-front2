@@ -23,7 +23,7 @@ interface User {
     joinDate: string;
     authorizationLevel: string;
     status: string;
-}
+} 
 
 @Component({
     selector: 'app-user-list',

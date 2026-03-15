@@ -1,0 +1,261 @@
+<p-toast />
+
+<div class="card vehicule-form">
+  @if (loading) {
+    <div class="vf-loading-overlay" aria-live="polite" aria-busy="true">
+      <i class="pi pi-spin pi-spinner text-xl"></i>
+      <span>{{ isEditMode ? 'Mise à jour du véhicule...' : 'Création du véhicule...' }}</span>
+    </div>
+  }
+
+  <!-- ═══ HEADER MOBILE ═══ -->
+  <header class="mobile-vf-header">
+    <button pButton pRipple type="button" icon="pi pi-arrow-left"
+            class="p-button-rounded p-button-text mobile-vf-back"
+            aria-label="Retour" (click)="onCancel()"></button>
+    <div class="mobile-vf-title-wrap">
+      <h1 class="mobile-vf-title">{{ isEditMode ? 'Modifier le véhicule' : 'Nouveau véhicule' }}</h1>
+    </div>
+    <div style="width:2.25rem;flex-shrink:0"></div>
+  </header>
+
+  <!-- Titre desktop -->
+  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block vf-desktop-title">
+    {{ isEditMode ? 'Modifier le véhicule' : 'Nouveau véhicule' }}
+  </span>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- ══ Section 1 : Véhicule ══════════════════════════════════════════ -->
+    <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="vf-section-label col-span-12 lg:col-span-2">
+        <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Véhicule</div>
+      </div>
+      <div class="col-span-12 lg:col-span-10">
+        <div class="grid grid-cols-12 gap-4">
+
+          <!-- Photo -->
+          <div class="col-span-12 flex flex-col items-start gap-2 photo-upload-section">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 block">
+              Photo du véhicule
+              <span class="text-surface-400 text-sm font-normal ml-1">(optionnelle)</span>
+            </label>
+            @if (photoPreview) {
+              <div class="vf-photo-preview relative inline-block">
+                <img [src]="photoPreview" alt="Aperçu"
+                     class="rounded border border-surface-200"
+                     style="max-height:9rem;max-width:18rem;object-fit:cover;display:block" />
+                <button pButton pRipple type="button" icon="pi pi-times" severity="danger" size="small"
+                        [rounded]="true" [raised]="true"
+                        class="absolute top-0 right-0 m-1"
+                        (click)="removePhoto()"></button>
+              </div>
+            } @else {
+              <label class="vf-upload-zone flex flex-col items-center justify-center cursor-pointer rounded border-2 border-dashed surface-100 hover:surface-200 transition-colors"
+                     style="min-height:7rem;max-width:18rem;width:100%"
+                     (click)="photoInput.click()">
+                <i class="pi pi-cloud-upload text-2xl text-surface-400 mb-2"></i>
+                <span class="text-surface-400 text-sm text-center px-3">jpg, png, webp — max 3 Mo</span>
+              </label>
+              <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
+                     class="hidden" (change)="onPhotoChange($event)" />
+            }
+          </div>
+
+          <!-- Nom du véhicule -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Nom du véhicule <span class="text-red-500">*</span>
+            </label>
+            <input pInputText fluid formControlName="nom_vehicule" placeholder="Ex : Camion Bleu 01"
+                   [class.ng-invalid]="isInvalid('nom_vehicule')"
+                   [class.ng-dirty]="isInvalid('nom_vehicule')" />
+            @if (isInvalid('nom_vehicule')) {
+              <small class="text-red-500">Le nom du véhicule est requis.</small>
+            }
+          </div>
+
+          <!-- Immatriculation -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Immatriculation <span class="text-red-500">*</span>
+            </label>
+            <input pInputText fluid formControlName="immatriculation" placeholder="RC-1234-AB"
+                   [class.ng-invalid]="isInvalid('immatriculation')"
+                   [class.ng-dirty]="isInvalid('immatriculation')" />
+            @if (isInvalid('immatriculation')) {
+              <small class="text-red-500">L'immatriculation est requise.</small>
+            }
+          </div>
+
+          <!-- Type de véhicule -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Type de véhicule <span class="text-red-500">*</span>
+            </label>
+            <p-select formControlName="type_vehicule"
+                      [options]="typeVehiculeOptions"
+                      optionLabel="label" optionValue="value"
+                      placeholder="Sélectionner…"
+                      styleClass="w-full"
+                      (onChange)="onTypeVehiculeChange($event.value)"
+                      [ngClass]="{'ng-invalid ng-dirty': isInvalid('type_vehicule')}" />
+            @if (isInvalid('type_vehicule')) {
+              <small class="text-red-500">Le type est requis.</small>
+            }
+          </div>
+
+          <!-- Capacité -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Capacité (packs)
+              <span class="text-surface-400 text-sm font-normal ml-1">— auto selon type</span>
+            </label>
+            <p-inputNumber formControlName="capacite_packs" [min]="1" placeholder="300"
+                           [useGrouping]="false" styleClass="w-full" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Section 2 : Rattachement ════════════════════════════════════ -->
+    <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="vf-section-label col-span-12 lg:col-span-2">
+        <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Rattachement</div>
+      </div>
+      <div class="col-span-12 lg:col-span-10">
+        <div class="grid grid-cols-12 gap-4">
+
+          <!-- Usine (création uniquement) -->
+          @if (!isEditMode) {
+            <div class="vf-field mb-4 col-span-12 flex flex-col gap-1">
+              <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+                Usine <span class="text-red-500">*</span>
+              </label>
+              <p-select [options]="usineOptions()"
+                        [ngModel]="usineContext.currentUsineId()"
+                        [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="onUsineChange($event)"
+                        optionLabel="nom" optionValue="id"
+                        placeholder="Choisir l'usine pour ce véhicule…"
+                        styleClass="w-full"
+                        [ngClass]="{'ng-invalid ng-dirty': usineContext.currentUsineId() === null}" />
+              @if (usineContext.currentUsineId() === null) {
+                <small class="text-orange-500">
+                  <i class="pi pi-exclamation-triangle mr-1"></i>Veuillez sélectionner une usine.
+                </small>
+              }
+            </div>
+          }
+
+          <!-- Propriétaire -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Propriétaire <span class="text-red-500">*</span>
+            </label>
+            @if (loadingData) {
+              <p-skeleton height="2.5rem" />
+            } @else {
+              <p-select formControlName="proprietaire_id"
+                        [options]="proprietaires()"
+                        optionLabel="_label" optionValue="id"
+                        placeholder="Choisir un propriétaire…"
+                        [filter]="true" filterBy="nom,prenom,phone"
+                        styleClass="w-full"
+                        emptyMessage="Aucun propriétaire disponible"
+                        [ngClass]="{'ng-invalid ng-dirty': isInvalid('proprietaire_id')}">
+                <ng-template #item let-p>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold text-xs flex-shrink-0"
+                          style="width:1.75rem;height:1.75rem">
+                      {{ p.prenom[0] }}{{ p.nom[0] }}
+                    </span>
+                    <div>
+                      <div class="font-medium text-sm">{{ p.prenom }} {{ p.nom }}</div>
+                      <div class="text-xs text-surface-500">{{ p.phone | phoneFormat }}</div>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-select>
+            }
+            @if (isInvalid('proprietaire_id')) {
+              <small class="text-red-500">Veuillez sélectionner un propriétaire.</small>
+            }
+            @if (!loadingData && proprietaires().length === 0) {
+              <small class="text-orange-500">
+                <i class="pi pi-exclamation-triangle mr-1"></i>Aucun propriétaire.
+                <a class="text-primary cursor-pointer font-medium"
+                   (click)="router.navigate(['/vehicules/proprietaires'])">En créer un</a>
+              </small>
+            }
+          </div>
+
+          <!-- Livreur principal -->
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+              Livreur principal
+              <span class="text-surface-400 text-sm font-normal ml-1">(optionnel)</span>
+            </label>
+            @if (loadingData) {
+              <p-skeleton height="2.5rem" />
+            } @else {
+              <p-select formControlName="livreur_principal_id"
+                        [options]="livreurs()"
+                        optionLabel="_label" optionValue="id"
+                        placeholder="Choisir un livreur… (optionnel)"
+                        [filter]="true" filterBy="nom,prenom,phone"
+                        [showClear]="true"
+                        styleClass="w-full"
+                        emptyMessage="Aucun livreur disponible">
+                <ng-template #item let-l>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center rounded-full bg-primary-100 text-primary font-bold text-xs flex-shrink-0"
+                          style="width:1.75rem;height:1.75rem">
+                      {{ l.prenom[0] }}{{ l.nom[0] }}
+                    </span>
+                    <div>
+                      <div class="font-medium text-sm">{{ l.prenom }} {{ l.nom }}</div>
+                      <div class="text-xs text-surface-500">{{ l.phone | phoneFormat }}</div>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-select>
+            }
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Section 3 : Statut (édition uniquement) ════════════════════ -->
+    @if (isEditMode) {
+      <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+        <div class="vf-section-label col-span-12 lg:col-span-2">
+          <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Statut</div>
+          <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">
+            Activer ou désactiver ce véhicule.
+          </p>
+        </div>
+        <div class="col-span-12 lg:col-span-10 flex items-center gap-3">
+          <p-toggleswitch formControlName="is_active" inputId="is_active" />
+          <label for="is_active" class="cursor-pointer text-sm font-medium text-surface-900 dark:text-surface-0">
+            {{ form.get('is_active')?.value ? 'Actif' : 'Inactif' }}
+          </label>
+        </div>
+      </div>
+    }
+
+    <!-- ══ Actions ════════════════════════════════════════════════════ -->
+    <div class="vf-actions col-span-12 flex gap-2 justify-end">
+      <button pButton pRipple type="button" text label="Annuler"
+              (click)="onCancel()" [disabled]="loading"></button>
+      <button pButton pRipple type="submit"
+              [label]="isEditMode ? 'Enregistrer les modifications' : 'Créer le véhicule'"
+              icon="pi pi-check"
+              [loading]="loading"
+              [disabled]="usineMissing || loading"></button>
+    </div>
+
+  </form>
+</div>

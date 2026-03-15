@@ -1,0 +1,24 @@
+<p-toast />
+
+@if (loadingPage) {
+  <div class="card p-8 flex items-center justify-center gap-3 text-surface-400">
+    <i class="pi pi-spin pi-spinner text-2xl"></i>
+    <span>Chargement du packing...</span>
+  </div>
+} @else if (notFound) {
+  <div class="card p-8 text-center">
+    <i class="pi pi-exclamation-circle text-4xl text-orange-400 mb-4 block"></i>
+    <p class="text-surface-600 dark:text-surface-300 text-lg mb-4">Packing introuvable.</p>
+    <a class="text-primary cursor-pointer font-medium" routerLink="/packings">Retour a la liste</a>
+  </div>
+} @else if (packing) {
+  <app-packing-form
+    mode="edit"
+    [initialData]="packing"
+    [prestataires]="prestataires"
+    [loading]="saving"
+    [loadingPrestataires]="loadingPrestataires"
+    (submitForm)="onSubmit($event)"
+    (cancel)="onCancel()"
+  />
+}

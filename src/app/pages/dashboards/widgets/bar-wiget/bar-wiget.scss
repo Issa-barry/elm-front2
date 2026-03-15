@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.bar-chart-wrap {
+  min-height: 320px;
+}
+
+:host ::ng-deep .bar-chart-wrap .p-chart {
+  height: 320px;
+}
+
+:host ::ng-deep .bar-chart-wrap canvas {
+  max-height: 320px !important;
+}

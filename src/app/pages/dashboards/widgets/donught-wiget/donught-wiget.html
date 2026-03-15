@@ -1,0 +1,30 @@
+﻿<div class="col-span-12 xl:col-span-6">
+    <div class="card h-full flex flex-col">
+        <div class="flex w-full items-center justify-between mb-4">
+            <div class="font-semibold text-xl">Commandes par type de vehicule</div>
+            <p-select
+                [options]="periodOptions"
+                [ngModel]="selectedPeriod()"
+                (ngModelChange)="onPeriodChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{ 'min-width': '180px' }"
+                appendTo="body"
+            />
+        </div>
+
+        @if (loading()) {
+            <div class="flex items-center justify-center donught-chart-wrap">
+                <p-skeleton height="220px" width="220px" borderRadius="50%" />
+            </div>
+        } @else if (errorMessage()) {
+            <div class="text-red-500 text-sm">{{ errorMessage() }}</div>
+        } @else if (!hasData()) {
+            <div class="text-surface-500 text-sm">Aucune donnee disponible pour cette periode.</div>
+        } @else {
+            <div class="donught-chart-wrap">
+                <p-chart type="doughnut" [data]="pieData" [options]="pieOptions"></p-chart>
+            </div>
+        }
+    </div>
+</div>

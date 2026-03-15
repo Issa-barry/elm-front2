@@ -1,0 +1,288 @@
+:host {
+  display: block;
+}
+
+.produits-mobile-app {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    --mobile-primary: #5f6bff;
+    --mobile-text: #334155;
+    --mobile-muted: #7f8ca3;
+    --mobile-card: #ffffff;
+    --mobile-border: #e2e8f0;
+  }
+
+  .produits-desktop {
+    display: none;
+  }
+
+  .produits-mobile-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    margin-top: calc(-0.25rem - env(safe-area-inset-top));
+    margin-left: -0.875rem;
+    margin-right: -0.875rem;
+    margin-bottom: calc(-0.875rem - env(safe-area-inset-bottom));
+    padding: 0 0.875rem env(safe-area-inset-bottom);
+    padding-left: calc(0.875rem + env(safe-area-inset-left));
+    padding-right: calc(0.875rem + env(safe-area-inset-right));
+    background: #f8fafc;
+    animation: mobileFade 0.24s ease-out;
+  }
+
+  .mobile-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 -0.875rem 0;
+    padding: calc(0.5rem + env(safe-area-inset-top)) calc(0.875rem + env(safe-area-inset-right)) 0.6rem
+      calc(0.875rem + env(safe-area-inset-left));
+    background: var(--mobile-card);
+    border-bottom: 1px solid var(--mobile-border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .mobile-back,
+  .mobile-upload {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: var(--mobile-primary) !important;
+    background: rgba(95, 107, 255, 0.1) !important;
+  }
+
+  .mobile-title-wrap {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .mobile-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--mobile-text);
+  }
+
+  .mobile-subtitle {
+    margin: 0.1rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--mobile-muted);
+  }
+
+  .mobile-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 0.75rem;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  .mobile-search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-search-field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  :host ::ng-deep .mobile-search-field .p-iconfield,
+  :host ::ng-deep .mobile-search-field .p-inputtext {
+    width: 100%;
+  }
+
+  :host ::ng-deep .mobile-search-field .p-inputtext {
+    height: 2rem;
+    border-radius: 0.55rem;
+    border: 1px solid var(--mobile-border);
+    background: var(--mobile-card);
+    font-size: 0.88rem;
+  }
+
+  .mobile-filter-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.55rem;
+    color: var(--mobile-muted) !important;
+    border: 1px solid var(--mobile-border) !important;
+    background: var(--mobile-card) !important;
+  }
+
+  .mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+  }
+
+  .mobile-produit-card {
+    background: var(--mobile-card);
+    border: 1px solid var(--mobile-border);
+    border-radius: 0.85rem;
+    padding: 0.8rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+  }
+
+  .mobile-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .mobile-card-title-wrap {
+    min-width: 0;
+  }
+
+  .mobile-card-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mobile-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-card-code {
+    margin: 0.1rem 0 0;
+    font-size: 0.75rem;
+    color: var(--mobile-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-card-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.45rem;
+  }
+
+  .mobile-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+  }
+
+  .mobile-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--mobile-text);
+  }
+
+  .mobile-stock {
+    font-size: 0.76rem;
+    color: var(--mobile-muted);
+    white-space: nowrap;
+  }
+
+  .mobile-empty {
+    margin-top: 0.8rem;
+    background: var(--mobile-card);
+    border: 1px dashed var(--mobile-border);
+    border-radius: 0.85rem;
+    padding: 1.6rem 1rem;
+    text-align: center;
+    color: var(--mobile-muted);
+  }
+
+  .mobile-empty .pi {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .mobile-empty p {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .mobile-fab {
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    right: calc(1rem + env(safe-area-inset-right));
+    z-index: 25;
+    width: 3rem;
+    height: 3rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--mobile-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(95, 107, 255, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-fab .pi {
+    font-size: 1.1rem;
+  }
+
+  :host-context(.app-dark) {
+    :host {
+      --mobile-primary: var(--p-primary-400);
+      --mobile-text: var(--p-surface-100);
+      --mobile-muted: var(--p-surface-400);
+      --mobile-card: var(--p-surface-800);
+      --mobile-border: var(--p-surface-600);
+    }
+
+    .produits-mobile-app {
+      background: var(--p-surface-950);
+    }
+
+    .mobile-header {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    :host ::ng-deep .mobile-search-field .p-inputtext {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+      color: var(--p-surface-0);
+    }
+
+    .mobile-filter-btn {
+      border-color: var(--p-surface-600) !important;
+      background: var(--p-surface-800) !important;
+    }
+
+    .mobile-empty {
+      border-color: var(--p-surface-600);
+    }
+  }
+}
+
+@keyframes mobileFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

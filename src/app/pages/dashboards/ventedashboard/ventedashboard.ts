@@ -6,7 +6,6 @@ import { HeaderWidget } from '../banking/headerwidget';
 import { RecentTransactionsWidget } from '../banking/recenttransactionswidget';
 import { OverviewWidget } from '../banking/overviewwidget';
 import { RecentTransactionsTwoWidget } from '../banking/recenttransactionstwowidget';
-import { MonthlyPaymentsWidget } from '../banking/monthlypaymentswidget';
 import { SoldeCardWidget } from '../widgets/solde-card-widget/solde-card-widget';
 import {
   DashboardService,
@@ -30,7 +29,6 @@ import { VentedashboardMobileMenu } from '@/app/pages/dashboards/ventedashboard/
     RecentTransactionsWidget,
     OverviewWidget,
     RecentTransactionsTwoWidget,
-    MonthlyPaymentsWidget,
     SoldeCardWidget,
      caParStatutWidget,
     DonughtWiget, 

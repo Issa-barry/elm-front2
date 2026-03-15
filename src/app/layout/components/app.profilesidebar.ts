@@ -11,32 +11,13 @@ import { AuthService } from '@/services/auth/auth.service';
     template: `
         <p-drawer [visible]="visible()" (onHide)="onDrawerHide()" position="right" [transitionOptions]="'.3s cubic-bezier(0, 0, 0.2, 1)'" styleClass="layout-profile-sidebar w-full sm:w-25rem">
             <div class="flex flex-col mx-auto md:mx-0">
-                <span class="mb-2 font-semibold">Rôle : Admin entreprise</span>
-                <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">Isabella Andolini</span>
+                <span class="mb-2 font-semibold">Rôle : {{ userRole() }}</span>
+                <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">{{ userName() }}</span>
 
                 <ul class="list-none m-0 p-0">
-                    <li>
-                        <a class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150">
-                            <span>
-                                <i class="pi pi-user text-xl text-primary"></i>
-                            </span>
-                            <div class="ml-4">
-                                <span class="mb-2 font-semibold">Profile</span>
-                                <p class="text-surface-500 dark:text-surface-400 m-0">Lorem ipsum date visale</p>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150">
-                            <span>
-                                <i class="pi pi-money-bill text-xl text-primary"></i>
-                            </span>
-                            <div class="ml-4">
-                                <span class="mb-2 font-semibold">Facturation utilisateur</span>
-                                <p class="text-surface-500 dark:text-surface-400 m-0">Amet mimin mıollit</p>
-                            </div>
-                        </a>
-                    </li>
+                     
+                    
+                    
                     <li>
                         <a class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150">
                             <span>
@@ -113,6 +94,9 @@ export class AppProfileSidebar {
     private authService = inject(AuthService);
 
     visible = computed(() => !!this.layoutService.layoutState().profileSidebarVisible);
+
+    userName = computed(() => this.authService.currentUser()?.nom_complet ?? '');
+    userRole = computed(() => this.authService.currentUser()?.role_names?.[0] ?? this.authService.currentUser()?.roles?.[0] ?? '');
 
     onDrawerHide() {
         this.layoutService.layoutState.update((state) => ({

@@ -15,7 +15,7 @@
 
 .country-selected,
 .country-option {
-    display: inline-flex;
+    display: inline-flex; 
     align-items: center;
     gap: 0.45rem;
 }
@@ -96,12 +96,16 @@
     }
 
     .login-shell {
+        position: fixed;
+        inset: 0;
+        width: 100%;
         height: 100svh;
         min-height: 100svh;
         overflow: hidden;
     }
 
     .login-card {
+        width: 100%;
         height: 100%;
         min-height: 100%;
         overflow: hidden;
@@ -138,7 +142,7 @@
 
     :host ::ng-deep .login-card .p-inputtext {
         min-height: 3rem;
-        font-size: 1rem;
+        font-size: 16px !important;
     }
 
     :host ::ng-deep .login-card .p-select {
@@ -147,10 +151,17 @@
 
     :host ::ng-deep .login-card .p-select-label {
         padding-block: 0.75rem;
+        font-size: 16px !important;
     }
 
     :host ::ng-deep .login-card .p-select-dropdown {
         width: 2.5rem;
+    }
+
+    :host ::ng-deep .login-card input,
+    :host ::ng-deep .login-card select,
+    :host ::ng-deep .login-card textarea {
+        font-size: 16px !important;
     }
 
     :host ::ng-deep .login-phone-row .p-select {

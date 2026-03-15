@@ -4,7 +4,8 @@
       "Bash(netstat -ano)",
       "Bash(taskkill /PID 65500 /F)",
       "Bash(cmd /c \"taskkill /PID 65500 /F\")",
-      "Bash(find /c/laragon/www/elm-api -name *arametr* -type f)"
+      "Bash(find /c/laragon/www/elm-api -name *arametr* -type f)",
+      "Bash(find c:/laragon/www/apollo-ng-21.0.0/src -name *produit* -o -name *product*)"
     ]
   }
 }

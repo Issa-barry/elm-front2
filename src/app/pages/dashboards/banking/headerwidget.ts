@@ -18,10 +18,10 @@ import { AuthService } from '@/services/auth/auth.service';
                     <p class="text-surface-600 dark:text-surface-200 m-0">{{ role() }}</p>
                 </div>
             </div>
-            <div class="flex gap-2 sm:ml-auto">
-                <p-button pTooltip="Exchange" tooltipPosition="bottom" icon="pi pi-arrows-h" outlined rounded></p-button>
+            <div class="flex items-center gap-2 sm:ml-auto flex-wrap">
                 <p-button pTooltip="Withdraw" tooltipPosition="bottom" icon="pi pi-download" outlined rounded></p-button>
                 <p-button pTooltip="Send" tooltipPosition="bottom" icon="pi pi-send" rounded></p-button>
+                <ng-content></ng-content>
             </div>
         </div>
     `

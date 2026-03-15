@@ -1,4 +1,4 @@
-import { Component, OnInit, effect } from '@angular/core';
+import { Component, HostListener, OnInit, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '@/app/pages//service/product.service';
 import { SelectModule } from 'primeng/select';
@@ -17,6 +17,8 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
  import { caParStatutWidget } from '../widgets/caparstatutwidget';
 import { DonughtWiget } from '../widgets/donught-wiget/donught-wiget';
 import { BarWiget } from '../widgets/bar-wiget/bar-wiget';
+import { VentedashboardMobileCards } from '@/app/pages/dashboards/ventedashboard/ventedashboard-mobile-cards/ventedashboard-mobile-cards';
+import { VentedashboardMobileMenu } from '@/app/pages/dashboards/ventedashboard/ventedashboard-mobile-menu/ventedashboard-mobile-menu';
  
 @Component({
   selector: 'app-ventedashboard',
@@ -32,7 +34,9 @@ import { BarWiget } from '../widgets/bar-wiget/bar-wiget';
     SoldeCardWidget,
      caParStatutWidget,
     DonughtWiget, 
-    BarWiget
+    BarWiget,
+    VentedashboardMobileCards,
+    VentedashboardMobileMenu
   ],
   providers: [ProductService],
   templateUrl: './ventedashboard.html',
@@ -74,6 +78,7 @@ export class Ventedashboard implements OnInit {
   ];
 
   cardsLoading = true;
+  isMobileView = false;
 
   encaissementPeriod: VentesEncaissementsPeriod = 'today';
   totalFacturesMontant = 0;
@@ -98,8 +103,14 @@ export class Ventedashboard implements OnInit {
   }
 
   ngOnInit(): void {
+    this.syncViewportMode();
     this.readyForUsineReload = true;
     this.loadCards();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncViewportMode();
   }
 
   onEncaissementPeriodChange(period: VentesEncaissementsPeriod): void {
@@ -129,6 +140,15 @@ export class Ventedashboard implements OnInit {
     this.resteAEncaisserMontant = data?.reste_a_encaisser ?? 0;
     this.facturesImpayeesCount = data?.nb_factures_impayees ?? 0;
     this.facturesAnnuleesCount = data?.nb_factures_annulees ?? 0;
+  }
+
+  private syncViewportMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobileView = false;
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
   }
 
 }

@@ -1,55 +1,71 @@
 ﻿<div class="grid grid-cols-12 gap-8">
-    <div class="col-span-12 flex items-start sm:items-center gap-4">
-        <app-header-widget class="flex-1 min-w-0" />
+    <div class="col-span-12">
+        <app-header-widget class="flex-1 min-w-0">
+            <p-select
+                [ngModel]="encaissementPeriod"
+                (ngModelChange)="onEncaissementPeriodChange($event)"
+                [options]="encaissementPeriodGroups"
+                [group]="true"
+                optionGroupLabel="label"
+                optionGroupChildren="items"
+                optionLabel="label"
+                optionValue="value"
+                [disabled]="cardsLoading"
+                appendTo="body"
+                class="w-[170px] sm:w-[220px] shrink-0"
+                placeholder="Selectionner une periode"
+            />
+        </app-header-widget>
+    </div>
 
-        <p-select
-            [ngModel]="encaissementPeriod"
-            (ngModelChange)="onEncaissementPeriodChange($event)"
-            [options]="encaissementPeriodGroups"
-            [group]="true"
-            optionGroupLabel="label"
-            optionGroupChildren="items"
-            optionLabel="label"
-            optionValue="value"
-            [disabled]="cardsLoading"
-            appendTo="body"
-            class="w-[220px] shrink-0"
-            placeholder="Selectionner une periode"
+    @if (isMobileView) {
+        <app-ventedashboard-mobile-cards
+            [cardsLoading]="cardsLoading"
+            [totalFacturesMontant]="totalFacturesMontant"
+            [totalFacturesCount]="totalFacturesCount"
+            [facturesPayeesMontant]="facturesPayeesMontant"
+            [facturesPayeesCount]="facturesPayeesCount"
+            [resteAEncaisserMontant]="resteAEncaisserMontant"
+            [facturesImpayeesCount]="facturesImpayeesCount"
+            [facturesAnnuleesCount]="facturesAnnuleesCount"
         />
-    </div>
 
-    <app-solde-card-widget
-        title="Total Factures"
-        [value]="totalFacturesMontant"
-        [subtitle]="totalFacturesCount + ' facture(s)'"
-        [loading]="cardsLoading"
-        variant="primary"
-    />
+        <app-ventedashboard-mobile-menu />
+    } @else {
+        <app-solde-card-widget
+            title="Total Factures"
+            [value]="totalFacturesMontant"
+            [subtitle]="totalFacturesCount + ' facture(s)'"
+            [loading]="cardsLoading"
+            variant="primary"
+        />
 
-    <app-solde-card-widget
-        title="Factures payees"
-        [value]="facturesPayeesMontant"
-        [subtitle]="facturesPayeesCount + ' facture(s) payee(s)'"
-        [loading]="cardsLoading"
-    />
+        <app-solde-card-widget
+            title="Factures payees"
+            [value]="facturesPayeesMontant"
+            [subtitle]="facturesPayeesCount + ' facture(s) payee(s)'"
+            [loading]="cardsLoading"
+        />
 
-    <app-solde-card-widget
-        title="Reste a encaisser"
-        [value]="resteAEncaisserMontant"
-        [subtitle]="facturesImpayeesCount + ' impayee(s) • ' + facturesAnnuleesCount + ' annulee(s)'"
-        [loading]="cardsLoading"
-    />
+        <app-solde-card-widget
+            title="Reste a encaisser"
+            [value]="resteAEncaisserMontant"
+            [subtitle]="facturesImpayeesCount + ' impayee(s) • ' + facturesAnnuleesCount + ' annulee(s)'"
+            [loading]="cardsLoading"
+        />
+    }
 
-    
-      <div class="col-span-12 lg:col-span-12">
-        <app-bar-wiget />
-    </div>
+    @if (!isMobileView) {
+        <div class="col-span-12 lg:col-span-12">
+            <app-bar-wiget />
+        </div>
 
-    <app-donught-wiget />
+        <app-donught-wiget />
 
-    <div class="col-span-12 lg:col-span-6">
-        <app-ca-par-statut-widget />
-    </div>
+        <div class="col-span-12 lg:col-span-6">
+            <app-ca-par-statut-widget />
+        </div>
+    }
 
      
 </div>

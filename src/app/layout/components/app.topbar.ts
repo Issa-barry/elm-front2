@@ -23,7 +23,7 @@ import { InputIconModule } from 'primeng/inputicon';
 
         <div class="topbar-end">
             <ul class="topbar-menu">
-                <li class="topbar-search">
+                <li class="topbar-Rechercher">
                     <p-iconfield>
                         <p-inputicon class="pi pi-search" />
                         <input type="text" pInputText placeholder="Search" class="w-48 sm:w-full" />

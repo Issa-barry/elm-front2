@@ -1,0 +1,83 @@
+.mobile-cards-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 94%;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.125rem 0.25rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-cards-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-card-slide {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-width: 0;
+}
+
+.mobile-cards-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.mobile-dot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: var(--p-surface-400);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.mobile-dot.active {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--p-primary-500);
+  opacity: 1;
+}
+
+:host ::ng-deep .mobile-card-slide .card {
+  min-height: 9.25rem;
+  padding: 0.9rem;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-xl.font-semibold.mb-4 {
+  font-size: 0.98rem !important;
+  margin-bottom: 0.45rem !important;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-2xl.mb-8.font-bold {
+  font-size: 1.3rem !important;
+  margin-bottom: 0.45rem !important;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-lg {
+  font-size: 0.9rem !important;
+}
+
+:host ::ng-deep .mobile-card-slide .card.flex-col.items-center.justify-center.text-center {
+  justify-content: flex-start !important;
+  padding-top: 1rem;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-lg.mb-6.font-medium {
+  margin-bottom: 0.6rem !important;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-2xl.text-primary.font-bold {
+  font-size: 1.25rem !important;
+}
+
+:host ::ng-deep .mobile-card-slide .card .text-sm.text-surface-500.dark\:text-surface-300.mt-3 {
+  margin-top: 0.35rem !important;
+}

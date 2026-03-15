@@ -1,0 +1,40 @@
+<div class="col-span-12">
+  <div #cardsCarousel class="mobile-cards-carousel" (scroll)="onCardsScroll($event)">
+    <app-solde-card-widget
+      title="Total Factures"
+      [value]="totalFacturesMontant"
+      [subtitle]="totalFacturesCount + ' facture(s)'"
+      [loading]="cardsLoading"
+      variant="primary"
+      [columnClass]="'mobile-card-slide'"
+    />
+
+    <app-solde-card-widget
+      title="Factures payees"
+      [value]="facturesPayeesMontant"
+      [subtitle]="facturesPayeesCount + ' facture(s) payee(s)'"
+      [loading]="cardsLoading"
+      [columnClass]="'mobile-card-slide'"
+    />
+
+    <app-solde-card-widget
+      title="Reste a encaisser"
+      [value]="resteAEncaisserMontant"
+      [subtitle]="facturesImpayeesCount + ' impayee(s) - ' + facturesAnnuleesCount + ' annulee(s)'"
+      [loading]="cardsLoading"
+      [columnClass]="'mobile-card-slide'"
+    />
+  </div>
+
+  <div class="mobile-cards-dots">
+    @for (i of cardIndexes; track i) {
+      <button
+        type="button"
+        class="mobile-dot"
+        [class.active]="activeCardIndex === i"
+        (click)="scrollToCard(i)"
+        [attr.aria-label]="'Aller a la carte ' + (i + 1)"
+      ></button>
+    }
+  </div>
+</div>

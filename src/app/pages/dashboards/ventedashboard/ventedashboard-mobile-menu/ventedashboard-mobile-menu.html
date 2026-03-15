@@ -1,0 +1,15 @@
+<div class="col-span-12">
+  <div class="mobile-menu-grid">
+    @for (item of items; track item.routerLink) {
+      <a
+        class="mobile-menu-card"
+        [class.active]="isActive(item)"
+        [routerLink]="item.routerLink"
+        [attr.aria-label]="item.label"
+      >
+        <i [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </div>
+</div>

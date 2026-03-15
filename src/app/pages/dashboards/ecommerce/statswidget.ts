@@ -7,6 +7,8 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DashboardService, DashboardStats } from '@/services/dashboard/dashboard.service';
 import { DashboardPeriod, DashboardPeriodService } from '@/services/dashboard/dashboard-period.service';
+import { LivreurService } from '@/services/livreurs/livreur.service';
+import { ProprietaireService } from '@/services/proprietaires/proprietaire.service';
 
 @Component({
     standalone: true,
@@ -26,7 +28,7 @@ import { DashboardPeriod, DashboardPeriodService } from '@/services/dashboard/da
         </div>
 
         @if (loading) {
-            @for (i of [1, 2, 3, 4, 5]; track i) {
+            @for (i of [1, 2, 3, 4, 5, 6, 7]; track i) {
                 <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
                     <div class="card h-full">
                         <p-skeleton height="1.5rem" width="60%" />
@@ -125,6 +127,52 @@ import { DashboardPeriod, DashboardPeriodService } from '@/services/dashboard/da
                     </div>
                 </div>
             </div>
+
+              <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
+                <div class="card h-full">
+                    <span class="font-semibold text-lg">Livreurs</span>
+                    <div class="text-xs text-surface-400 mt-0.5 mb-4">{{ periodSubtitle() }}</div>
+                    <div class="flex justify-between items-start">
+                        <div class="w-6/12">
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ livreursCount }}</span>
+                            <div [class]="trendClass('flat')">
+                                <span class="font-medium">{{ formatDelta(null) }}</span>
+                            </div>
+                        </div>
+                        <div class="w-6/12">
+                            <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    [attr.d]="sparklinePath([1, 1, 1, 1])"
+                                    [style]="{ strokeWidth: '2px', stroke: strokeColor('flat') }"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
+                <div class="card h-full">
+                    <span class="font-semibold text-lg">Proprietaires</span>
+                    <div class="text-xs text-surface-400 mt-0.5 mb-4">{{ periodSubtitle() }}</div>
+                    <div class="flex justify-between items-start">
+                        <div class="w-6/12">
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ proprietairesCount }}</span>
+                            <div [class]="trendClass('flat')">
+                                <span class="font-medium">{{ formatDelta(null) }}</span>
+                            </div>
+                        </div>
+                        <div class="w-6/12">
+                            <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    [attr.d]="sparklinePath([1, 1, 1, 1])"
+                                    [style]="{ strokeWidth: '2px', stroke: strokeColor('flat') }"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
              <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
                 <div class="card h-full">
@@ -177,6 +225,8 @@ import { DashboardPeriod, DashboardPeriodService } from '@/services/dashboard/da
                     </div>
                 </div>
             </div>
+
+          
         }
     `,
     host: {
@@ -185,6 +235,8 @@ import { DashboardPeriod, DashboardPeriodService } from '@/services/dashboard/da
 })
 export class StatsWidget implements OnDestroy {
     private readonly dashboardService = inject(DashboardService);
+    private readonly livreurService = inject(LivreurService);
+    private readonly proprietaireService = inject(ProprietaireService);
     readonly periodService = inject(DashboardPeriodService);
 
     readonly periodOptions: Array<{ label: string; value: DashboardPeriod }> = [
@@ -200,6 +252,8 @@ export class StatsWidget implements OnDestroy {
 
     stats: DashboardStats | null = null;
     loading = true;
+    livreursCount = 0;
+    proprietairesCount = 0;
 
     private readonly cancel$ = new Subject<void>();
 
@@ -229,6 +283,7 @@ export class StatsWidget implements OnDestroy {
         this.loading = true;
         this.stats = null;
         this.cancel$.next();
+        this.loadRelatedCounts();
 
         this.dashboardService
             .getStats(period, period === 'last_x_days' ? days : undefined)
@@ -242,6 +297,39 @@ export class StatsWidget implements OnDestroy {
                     this.loading = false;
                 }
             });
+    }
+
+    private loadRelatedCounts(): void {
+        this.livreurService
+            .getAll()
+            .pipe(takeUntil(this.cancel$))
+            .subscribe({
+                next: (response) => {
+                    this.livreursCount = this.extractTotal(response?.data);
+                },
+                error: () => {
+                    this.livreursCount = 0;
+                }
+            });
+
+        this.proprietaireService
+            .getAll()
+            .pipe(takeUntil(this.cancel$))
+            .subscribe({
+                next: (response) => {
+                    this.proprietairesCount = this.extractTotal(response?.data);
+                },
+                error: () => {
+                    this.proprietairesCount = 0;
+                }
+            });
+    }
+
+    private extractTotal(data: { total?: unknown; data?: unknown[] } | null | undefined): number {
+        if (!data) return 0;
+        if (typeof data.total === 'number' && Number.isFinite(data.total)) return data.total;
+        if (Array.isArray(data.data)) return data.data.length;
+        return 0;
     }
 
     periodSubtitle(): string {

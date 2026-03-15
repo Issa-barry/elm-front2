@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
-import { StatsWidget } from '@/app/pages/dashboards/ecommerce/statswidget';
-import { RecentSalesWidget } from '@/app/pages/dashboards/ecommerce/recentsaleswidget';
-import { RevenueOverViewWidget } from '@/app/pages/dashboards/ecommerce/revenueoverviewwidget';
-import { SalesByCategoryWidget } from '@/app/pages/dashboards/ecommerce/salesbycategorywidget';
-import { TopProductsWidget } from '@/app/pages/dashboards/ecommerce/topproductswidget';
- 
+import { StatsWidget } from '../ecommerce/statswidget';
+import { RecentSalesWidget } from '../ecommerce/recentsaleswidget';
+import { StatsPackingWidget } from '../ecommerce/stats-packing-widget';
+import { TopProductsWidget } from '../ecommerce/topproductswidget';
+import { VehiculesCategorieWidget } from '@/app/pages/dashboards/ecommerce/vehicules-categorie-widget';
 
 @Component({
   selector: 'app-stats-dashboard',
   standalone: true,
-     imports: [StatsWidget, RecentSalesWidget, RevenueOverViewWidget, SalesByCategoryWidget, TopProductsWidget],
+  imports: [StatsWidget, RecentSalesWidget, StatsPackingWidget, VehiculesCategorieWidget, TopProductsWidget],
   templateUrl: './stats-dashboard.html',
   styleUrl: './stats-dashboard.scss',
 })

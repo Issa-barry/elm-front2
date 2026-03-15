@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { StatsWidget } from '@/app/pages/dashboards/ecommerce/statswidget';
 import { RecentSalesWidget } from '@/app/pages/dashboards/ecommerce/recentsaleswidget';
-import { RevenueOverViewWidget } from '@/app/pages/dashboards/ecommerce/revenueoverviewwidget';
-import { SalesByCategoryWidget } from '@/app/pages/dashboards/ecommerce/salesbycategorywidget';
+import { RevenueOverViewWidget } from '@/app/pages/dashboards/ecommerce/stats-packing-widget';
+import { SalesByCategoryWidget } from '@/app/pages/dashboards/ecommerce/vehicules-categorie-widget';
 import { TopProductsWidget } from '@/app/pages/dashboards/ecommerce/topproductswidget';
 
 @Component({

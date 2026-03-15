@@ -1,0 +1,347 @@
+:host {
+  display: block;
+}
+
+.packing-from-card {
+  position: relative;
+}
+
+.pfr-desktop-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+@media screen and (min-width: 769px) {
+  .packing-from-card {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// Desktop : montant row
+.pfr-montant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--p-surface-200, #e2e8f0);
+  border-radius: 0.5rem;
+  background: var(--p-surface-50, #f8fafc);
+}
+
+.pfr-montant-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pfr-montant-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  border-radius: 50%;
+  background: rgba(95, 107, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6bff;
+  font-size: 1rem;
+}
+
+.pfr-montant-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--p-surface-400, #94a3b8);
+}
+
+.pfr-montant-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #5f6bff;
+  line-height: 1.1;
+}
+
+.pfr-montant-calc {
+  font-size: 0.8rem;
+  color: var(--p-surface-400, #94a3b8);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pfr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  button[type="submit"] {
+    align-self: flex-end;
+    min-width: 12rem;
+  }
+}
+
+.pfr-input-skeleton {
+  display: flex;
+  flex-direction: column;
+}
+
+:host-context(.app-dark) {
+  .pfr-montant-row {
+    border-color: var(--p-surface-700);
+    background: var(--p-surface-800);
+  }
+}
+
+// Mobile header masque par defaut (desktop)
+.mobile-pfr-header {
+  display: none;
+}
+
+// Loading overlay desktop
+.pfr-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #334155;
+  font-weight: 600;
+  border-radius: inherit;
+}
+
+:host-context(.app-dark) .pfr-loading-overlay {
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--p-surface-100);
+}
+
+@media screen and (max-width: 768px) {
+  // Outer card : kill shell, fond gris app
+  .packing-from-card {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #f8fafc !important;
+    padding: 0 !important;
+    margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem calc(-0.875rem - env(safe-area-inset-bottom));
+    margin-left: calc(-0.875rem - env(safe-area-inset-left));
+    margin-right: calc(-0.875rem - env(safe-area-inset-right));
+    min-height: 100dvh;
+  }
+
+  // Titre desktop masque
+  .pfr-desktop-title,
+  .pfr-desktop-title-row {
+    display: none;
+  }
+
+  // Header mobile sticky
+  .mobile-pfr-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: calc(0.5rem + env(safe-area-inset-top))
+             calc(0.875rem + env(safe-area-inset-right))
+             0.6rem
+             calc(0.875rem + env(safe-area-inset-left));
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .mobile-pfr-back {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: #5f6bff !important;
+    background: rgba(95, 107, 255, 0.1) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-pfr-edit {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .mobile-pfr-title-wrap {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .mobile-pfr-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+  }
+
+  // Form : flex vertical avec gap entre cards
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem 0.875rem calc(10rem + env(safe-area-inset-bottom));
+  }
+
+  // Sections : cards blanches
+  .pfr-section {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .pfr-section:last-of-type {
+    margin-bottom: 0.75rem;
+  }
+
+  .pfr-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+  }
+
+  // Champs
+  .pfr-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .pfr-label {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8 !important;
+  }
+
+  // Actions : sticky en bas (montant + bouton)
+  .pfr-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #e2e8f0;
+  }
+
+  // Ligne montant dans la barre du bas
+  .pfr-montant-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .pfr-montant-left {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .pfr-montant-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+    border-radius: 50%;
+    background: rgba(95, 107, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f6bff;
+    font-size: 1rem;
+  }
+
+  .pfr-montant-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+  }
+
+  .pfr-montant-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #5f6bff;
+    line-height: 1.1;
+  }
+
+  .pfr-montant-calc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .pfr-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  // Dark mode
+  :host-context(.app-dark) {
+    .packing-from-card {
+      background: var(--p-surface-950) !important;
+    }
+
+    .mobile-pfr-header {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-700);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-pfr-title { color: var(--p-surface-100); }
+
+    .mobile-pfr-back {
+      color: var(--p-primary-400) !important;
+      background: rgba(95, 107, 255, 0.1) !important;
+    }
+
+    .pfr-section {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-700);
+    }
+
+    .pfr-section-title,
+    .pfr-label { color: var(--p-surface-400) !important; }
+
+    .pfr-montant-calc,
+    .pfr-montant-label { color: var(--p-surface-400); }
+
+    .pfr-actions {
+      background: rgba(15, 23, 42, 0.96);
+      border-color: var(--p-surface-700);
+    }
+  }
+}

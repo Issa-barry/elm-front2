@@ -181,3 +181,11 @@
 
     <p-confirmdialog [style]="{ width: '450px' }" />
 </div>
+
+<app-utilisateur-form-dialog
+    [visible]="viewDialogVisible"
+    (visibleChange)="onDialogVisibleChange($event)"
+    [mode]="viewDialogMode"
+    [userId]="viewUserId"
+    (userSaved)="onDialogUserSaved($event)"
+/>

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -18,6 +17,7 @@ import { PhoneFormatPipe } from '@/app/pipes/phone-format.pipe';
 import { User } from '@/models/user.model';
 import { AuthService } from '@/services/auth/auth.service';
 import { ApiResponse, PaginatedResponse, UserFilters, UserService } from '@/services/users/users.service';
+import { UtilisateurFormDialog } from '../utilisateur-form-dialog/utilisateur-form-dialog';
 
 type UtilisateurFilter = 'all' | 'actif' | 'inactif';
 type StatusSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined;
@@ -46,6 +46,7 @@ interface UtilisateurRow extends User {
     ConfirmDialogModule,
     MenuModule,
     PhoneFormatPipe,
+    UtilisateurFormDialog,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './utilisateur-liste.html',
@@ -67,6 +68,9 @@ export class UtilisateurListe implements OnInit {
   first = 0;
   rows = 10;
   selectedUserId = signal<number | null>(null);
+  viewDialogVisible = false;
+  viewUserId: number | null = null;
+  viewDialogMode: 'create' | 'edit' = 'edit';
 
   get canCreate(): boolean {
     return this.authService.hasPermission('users.create');
@@ -123,7 +127,6 @@ export class UtilisateurListe implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
-    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -154,11 +157,34 @@ export class UtilisateurListe implements OnInit {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/contacts/utilisateurs/new']);
+    if (!this.canCreate) return;
+    this.viewDialogMode = 'create';
+    this.viewUserId = null;
+    this.viewDialogVisible = true;
   }
 
   goEdit(user: UtilisateurRow): void {
-    this.router.navigate(['/contacts/utilisateurs/edit', user.id]);
+    if (!this.canUpdate) return;
+    this.viewDialogMode = 'edit';
+    this.viewUserId = user.id;
+    this.viewDialogVisible = true;
+  }
+
+  onDialogVisibleChange(visible: boolean): void {
+    this.viewDialogVisible = visible;
+    if (!visible) {
+      this.viewUserId = null;
+    }
+  }
+
+  onDialogUserSaved(event: { user: User; mode: 'create' | 'edit' }): void {
+    this.load();
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Succes',
+      detail: event.mode === 'create' ? 'Utilisateur cree avec succes.' : 'Utilisateur modifie avec succes.',
+      life: 3000,
+    });
   }
 
   onFilterChange(value: UtilisateurFilter): void {

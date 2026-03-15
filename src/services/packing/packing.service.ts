@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import {
   Packing,
   CreatePackingDto,
@@ -119,5 +119,11 @@ export class PackingService {
     return this.http.get<ApiResponse<PackingStats>>(`${this.apiUrl}/stats`, {
       params: { period },
     });
+  }
+
+  getPrixRouleauDefaut(): Observable<number> {
+    return this.http
+      .get<ApiResponse<{ prix_rouleau_defaut: number }>>(`${this.apiUrl}/parametres`)
+      .pipe(map((r) => r.data?.prix_rouleau_defaut ?? 0));
   }
 }

@@ -58,6 +58,41 @@
       </div>
 
       <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="organisation_id" class="field-label">Organisation <span class="optional-hint">(facultatif)</span></label>
+        <p-select
+          id="organisation_id"
+          name="organisation_id"
+          [options]="organisationOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.organisation_id"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          (onChange)="onOrganisationChange()"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
+        <label for="site_id" class="field-label">Site <span class="required-star">*</span></label>
+        <p-select
+          id="site_id"
+          name="site_id"
+          [options]="siteOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.site_id"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          (onChange)="onSiteChange()"
+          styleClass="w-full"
+        ></p-select>
+        <small *ngIf="submitted && mode === 'create' && !model.site_id" class="field-error">Site obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6 mb-4">
         <label for="nom" class="field-label">Nom <span class="required-star">*</span></label>
         <input
           id="nom"

@@ -16,6 +16,7 @@ import { ToastModule } from 'primeng/toast';
 import { PhoneFormatPipe } from '@/app/pipes/phone-format.pipe';
 import { User } from '@/models/user.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineService } from '@/services/usine/usine.service';
 import { ApiResponse, PaginatedResponse, UserFilters, UserService } from '@/services/users/users.service';
 import { UtilisateurFormDialog } from '../utilisateur-form-dialog/utilisateur-form-dialog';
 
@@ -71,6 +72,8 @@ export class UtilisateurListe implements OnInit {
   viewDialogVisible = false;
   viewUserId: number | null = null;
   viewDialogMode: 'create' | 'edit' = 'edit';
+  private siteLabelById = new Map<number, string>();
+  private siteHydrationRequested = new Set<number>();
 
   get canCreate(): boolean {
     return this.authService.hasPermission('users.create');
@@ -124,12 +127,14 @@ export class UtilisateurListe implements OnInit {
 
   constructor(
     private userService: UserService,
+    private usineService: UsineService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    this.loadSites();
     this.load();
   }
 
@@ -143,6 +148,7 @@ export class UtilisateurListe implements OnInit {
         const rows = this.extractUsers(response).map((user) => this.toRow(user));
         this.users.set(rows);
         this.loading = false;
+        this.hydrateMissingSiteLabels(rows);
       },
       error: () => {
         this.loading = false;
@@ -374,11 +380,41 @@ export class UtilisateurListe implements OnInit {
     for (const key of listKeys) {
       const value = raw[key];
       if (!Array.isArray(value) || value.length === 0) continue;
-      const firstSite = this.extractSiteName(value[0]);
+      const preferredSite = value.find((entry) => this.isDefaultSiteEntry(entry)) ?? value[0];
+      const firstSite = this.extractSiteName(preferredSite);
       if (firstSite) return firstSite;
+
+      const firstSiteId = this.extractSiteId(preferredSite);
+      if (firstSiteId !== null) {
+        const labelFromMap = this.siteLabelById.get(firstSiteId);
+        if (labelFromMap) return labelFromMap;
+      }
+    }
+
+    const directSiteId = this.resolveSiteId(raw);
+    if (directSiteId !== null) {
+      const labelFromMap = this.siteLabelById.get(directSiteId);
+      if (labelFromMap) return labelFromMap;
     }
 
     return '-';
+  }
+
+  private resolveSiteId(raw: Record<string, unknown>): number | null {
+    return (
+      this.toNumberOrNull(raw['site_id']) ??
+      this.toNumberOrNull(raw['usine_id']) ??
+      this.toNumberOrNull(raw['default_site_id']) ??
+      this.toNumberOrNull(raw['default_usine_id']) ??
+      this.toNumberOrNull(raw['current_site_id']) ??
+      this.toNumberOrNull(raw['current_usine_id']) ??
+      this.extractSiteId(raw['site']) ??
+      this.extractSiteId(raw['usine']) ??
+      this.extractSiteId(raw['default_site']) ??
+      this.extractSiteId(raw['default_usine']) ??
+      this.extractSiteId(raw['current_site']) ??
+      this.extractSiteId(raw['current_usine'])
+    );
   }
 
   private extractSiteName(value: unknown): string | null {
@@ -399,6 +435,113 @@ export class UtilisateurListe implements OnInit {
     }
 
     return null;
+  }
+
+  private extractSiteId(value: unknown): number | null {
+    if (!value || typeof value !== 'object') return null;
+    const site = value as Record<string, unknown>;
+    return (
+      this.toNumberOrNull(site['id']) ??
+      this.toNumberOrNull(site['site_id']) ??
+      this.toNumberOrNull(site['usine_id'])
+    );
+  }
+
+  private isDefaultSiteEntry(value: unknown): boolean {
+    if (!value || typeof value !== 'object') return false;
+    const raw = value as Record<string, unknown>;
+
+    if (raw['is_default'] === true || raw['default'] === true) return true;
+
+    const pivot = raw['pivot'];
+    if (!pivot || typeof pivot !== 'object') return false;
+    const rawPivot = pivot as Record<string, unknown>;
+    return rawPivot['is_default'] === true || rawPivot['default'] === true;
+  }
+
+  private toNumberOrNull(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  private loadSites(): void {
+    this.usineService.getAll().subscribe({
+      next: (response) => {
+        const rows = this.extractSiteRows(response);
+        this.siteLabelById = new Map(
+          rows
+            .map((site) => {
+              const id = this.toNumberOrNull((site as Record<string, unknown>)['id']);
+              const label = this.toStringValue((site as Record<string, unknown>)['nom'] ?? (site as Record<string, unknown>)['name']);
+              return id !== null && label ? [id, label] as const : null;
+            })
+            .filter((entry): entry is readonly [number, string] => entry !== null),
+        );
+        this.refreshSiteLabelsFromMap();
+      },
+      error: () => {
+        this.siteLabelById = new Map<number, string>();
+      },
+    });
+  }
+
+  private refreshSiteLabelsFromMap(): void {
+    if (this.users().length === 0 || this.siteLabelById.size === 0) return;
+    this.users.update((list) =>
+      list.map((user) => ({
+        ...user,
+        siteLabel: this.resolveSiteLabel(user),
+      })),
+    );
+  }
+
+  private extractSiteRows(response: unknown): Record<string, unknown>[] {
+    const data = (response as { data?: unknown })?.data;
+    if (Array.isArray(data)) return data as Record<string, unknown>[];
+
+    const nestedData = (data as { data?: unknown })?.data;
+    if (Array.isArray(nestedData)) return nestedData as Record<string, unknown>[];
+
+    return [];
+  }
+
+  private hydrateMissingSiteLabels(rows: UtilisateurRow[]): void {
+    const candidates = rows
+      .filter((row) => row.siteLabel === '-')
+      .filter((row) => !this.siteHydrationRequested.has(row.id))
+      .slice(0, 5);
+
+    if (candidates.length === 0) return;
+
+    candidates.forEach((row) => this.siteHydrationRequested.add(row.id));
+    this.hydrateSiteLabelsSequentially(candidates, 0);
+  }
+
+  private hydrateSiteLabelsSequentially(candidates: UtilisateurRow[], index: number): void {
+    if (index >= candidates.length) return;
+
+    const row = candidates[index];
+    this.userService.getUser(row.id).subscribe({
+      next: (response) => {
+        const label = this.resolveSiteLabel(response.data);
+        if (!label || label === '-') return;
+
+        this.users.update((list) =>
+          list.map((user) => (user.id === row.id ? { ...user, siteLabel: label } : user)),
+        );
+      },
+      error: () => {
+        // Ignore ponctual hydration errors to keep UI reactive.
+        this.hydrateSiteLabelsSequentially(candidates, index + 1);
+      },
+      complete: () => {
+        this.hydrateSiteLabelsSequentially(candidates, index + 1);
+      },
+    });
   }
 
   private toStringArray(value: unknown): string[] {

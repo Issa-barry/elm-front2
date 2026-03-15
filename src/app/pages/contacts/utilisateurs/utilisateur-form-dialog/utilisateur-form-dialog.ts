@@ -6,9 +6,13 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
+import { timeout } from 'rxjs';
 
 import { COUNTRIES } from '@/models/country.model';
+import { Organisation } from '@/models/organisation.model';
 import { CIVILITE_LABELS, Civilite, CreateUserDto, User, UserType } from '@/models/user.model';
+import { Usine } from '@/models/usine.model';
+import { OrganisationService } from '@/services/organisations/organisation.service';
 import { RoleService } from '@/services/role/role.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import { UsineService } from '@/services/usine/usine.service';
@@ -21,6 +25,11 @@ type RoleOption = {
   value: string;
 };
 
+type SimpleOption = {
+  label: string;
+  value: number;
+};
+
 type UserDialogResult = {
   user: User;
   mode: DialogMode;
@@ -31,6 +40,8 @@ type UserDialogForm = {
   prenom: string;
   phone: string;
   email: string;
+  organisation_id: number | null;
+  site_id: number | null;
   code_pays: string;
   pays: string;
   ville: string;
@@ -86,6 +97,10 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
   private readonly staffRoles = ['admin_entreprise', 'manager', 'comptable', 'agent_vente', 'employe'];
 
   availableRoles: RoleOption[] = [];
+  organisationOptions: SimpleOption[] = [];
+  siteOptions: SimpleOption[] = [];
+  private allSites: Usine[] = [];
+  private pendingSiteLabel: string | null = null;
   private rolesLoaded = false;
 
   model: UserDialogForm = this.getDefaultModel();
@@ -93,12 +108,15 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
   constructor(
     private userService: UserService,
     private roleService: RoleService,
+    private organisationService: OrganisationService,
     private usineContext: UsineContextService,
     private usineService: UsineService
   ) {}
 
   ngOnInit(): void {
     this.loadRoles();
+    this.loadOrganisations();
+    this.loadSites();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -182,6 +200,20 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     }
   }
 
+  onOrganisationChange(): void {
+    this.refreshSiteOptions();
+  }
+
+  onSiteChange(): void {
+    this.pendingSiteLabel = null;
+    if (this.model.organisation_id) return;
+    const selectedSite = this.allSites.find((site) => site.id === this.model.site_id);
+    const selectedOrganisationId = selectedSite ? this.resolveSiteOrganisationId(selectedSite) : null;
+    if (!selectedOrganisationId) return;
+    this.model.organisation_id = selectedOrganisationId;
+    this.refreshSiteOptions();
+  }
+
   onPhoneBlur(): void {
     if (!this.model.phone.trim()) {
       this.phonePrefixError = null;
@@ -217,6 +249,7 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     this.setFormError(null);
     this.model = this.getDefaultModel();
     this.loadedUser = null;
+    this.pendingSiteLabel = null;
 
     this.loadRoles();
 
@@ -225,6 +258,9 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
       return;
     }
 
+    const currentSiteId = this.usineContext.currentUsineId();
+    this.model.site_id = currentSiteId;
+    this.refreshSiteOptions();
     this.applyCreateDefaults();
     this.loading = false;
   }
@@ -259,15 +295,20 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
 
   private loadUser(id: number): void {
     this.loading = true;
-    this.userService.getUser(id).subscribe({
+    this.userService.getUser(id).pipe(
+      timeout(15000),
+    ).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.loadedUser = response.data;
+          this.pendingSiteLabel = this.resolveUserSiteLabel(response.data);
           this.model = {
             nom: response.data.nom ?? '',
             prenom: response.data.prenom ?? '',
-            phone: response.data.phone ?? '',
+            phone: this.toLocalPhone(response.data.phone ?? '', response.data.code_pays || 'GN'),
             email: response.data.email ?? '',
+            organisation_id: this.resolveUserOrganisationId(response.data),
+            site_id: this.resolveUserSiteId(response.data),
             code_pays: response.data.code_pays || 'GN',
             pays: response.data.pays || this.getCountryName(response.data.code_pays || 'GN'),
             ville: response.data.ville ?? '',
@@ -279,6 +320,7 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
             password: '',
             password_confirmation: '',
           };
+          this.refreshSiteOptions();
           this.onTypeChange();
         } else {
           this.setFormError('Impossible de charger cet utilisateur.');
@@ -293,9 +335,9 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
   }
 
   private createUser(): void {
-    const currentUsineId = this.usineContext.currentUsineId();
-    if (currentUsineId === null) {
-      this.setFormError("Veuillez selectionner une usine avant de creer un utilisateur.");
+    const siteId = this.model.site_id ?? this.usineContext.currentUsineId();
+    if (siteId === null) {
+      this.setFormError('Veuillez selectionner un site avant de creer un utilisateur.');
       return;
     }
 
@@ -307,7 +349,7 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     const payload: CreateUserDto = {
       nom: this.model.nom.trim(),
       prenom: this.model.prenom.trim(),
-      phone: this.normalizePhone(this.model.phone),
+      phone: this.normalizePhoneForApi(this.model.phone, this.model.code_pays),
       email: this.model.email.trim() || undefined,
       pays: this.model.pays,
       code_pays: this.model.code_pays,
@@ -333,7 +375,7 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
         const user = response.data;
         const usineRole = (payload.role === 'admin_entreprise' || payload.role === 'manager') ? 'manager' : 'staff';
 
-        this.usineService.assignUser(currentUsineId, { user_id: user.id, role: usineRole }).subscribe({
+        this.usineService.assignUser(siteId, { user_id: user.id, role: usineRole }).subscribe({
           next: () => {
             this.saving = false;
             this.userSaved.emit({ user, mode: 'create' });
@@ -362,7 +404,7 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     const payload: UpdateUserDto = {
       nom: this.model.nom.trim(),
       prenom: this.model.prenom.trim(),
-      phone: this.normalizePhone(this.model.phone),
+      phone: this.normalizePhoneForApi(this.model.phone, this.model.code_pays),
       email: this.model.email.trim() || undefined,
       pays: this.model.pays,
       code_pays: this.model.code_pays,
@@ -373,6 +415,8 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
       role: this.model.role,
       civilite: this.model.civilite ?? null,
       date_naissance: this.model.date_naissance || null,
+      ...(this.model.site_id ? { site_id: this.model.site_id, site_role: 'staff' } : {}),
+      ...(this.model.organisation_id ? { organisation_id: this.model.organisation_id } : {}),
     };
 
     this.userService.updateUser(this.userId, payload).subscribe({
@@ -410,6 +454,11 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
       return false;
     }
 
+    if (this.mode === 'create' && !this.model.site_id && this.usineContext.currentUsineId() === null) {
+      this.setFormError('Le site est obligatoire.');
+      return false;
+    }
+
     if (!this.validatePhonePrefixAndNormalize()) {
       return false;
     }
@@ -441,8 +490,16 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     return country ? country.name : 'Guinee';
   }
 
-  private normalizePhone(phone: string): string {
-    return (phone || '').replace(/[^\d+]/g, '');
+  private normalizePhoneForApi(phone: string, codeCountry: string): string {
+    const dialCode = this.getCodePhonePays(codeCountry);
+    const dialDigits = dialCode.replace('+', '');
+    let digits = (phone || '').replace(/\D/g, '');
+
+    if (digits.startsWith(dialDigits) && digits.length > dialDigits.length) {
+      digits = digits.slice(dialDigits.length);
+    }
+
+    return `${dialCode}${digits}`;
   }
 
   private resolveUserRole(user: User): string {
@@ -454,6 +511,151 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     if (typeof raw.role_name === 'string' && raw.role_name.trim()) return raw.role_name.trim();
 
     return user.type === 'staff' ? this.getFirstStaffRoleValue() : user.type;
+  }
+
+  private resolveUserOrganisationId(user: User): number | null {
+    const raw = user as unknown as {
+      organisation_id?: unknown;
+      organisation?: { id?: unknown } | null;
+    };
+
+    const direct = this.toNumberOrNull(raw.organisation_id);
+    if (direct !== null) return direct;
+
+    return this.toNumberOrNull(raw.organisation?.id);
+  }
+
+  private resolveUserSiteId(user: User): number | null {
+    const raw = user as unknown as {
+      site_id?: unknown;
+      usine_id?: unknown;
+      default_site_id?: unknown;
+      default_usine_id?: unknown;
+      current_site_id?: unknown;
+      current_usine_id?: unknown;
+      site?: { id?: unknown } | null;
+      usine?: { id?: unknown } | null;
+      current_site?: { id?: unknown } | null;
+      current_usine?: { id?: unknown } | null;
+      default_site?: { id?: unknown } | null;
+      default_usine?: { id?: unknown } | null;
+      sites?: unknown;
+      usines?: unknown;
+      accessible_sites?: unknown;
+      accessible_usines?: unknown;
+    };
+
+    const directId = (
+      this.toNumberOrNull(raw.site_id) ??
+      this.toNumberOrNull(raw.usine_id) ??
+      this.toNumberOrNull(raw.default_site_id) ??
+      this.toNumberOrNull(raw.default_usine_id) ??
+      this.toNumberOrNull(raw.current_site_id) ??
+      this.toNumberOrNull(raw.current_usine_id) ??
+      this.toNumberOrNull(raw.site?.id) ??
+      this.toNumberOrNull(raw.usine?.id) ??
+      this.toNumberOrNull(raw.current_site?.id) ??
+      this.toNumberOrNull(raw.current_usine?.id) ??
+      this.toNumberOrNull(raw.default_site?.id) ??
+      this.toNumberOrNull(raw.default_usine?.id)
+    );
+
+    if (directId !== null) return directId;
+
+    const listKeys = [raw.sites, raw.usines, raw.accessible_sites, raw.accessible_usines];
+    for (const listValue of listKeys) {
+      const siteId = this.extractPreferredSiteIdFromList(listValue);
+      if (siteId !== null) return siteId;
+    }
+
+    return null;
+  }
+
+  private resolveUserSiteLabel(user: User): string | null {
+    const raw = user as unknown as Record<string, unknown>;
+    const directKeys = [
+      'site_label',
+      'site_name',
+      'site_nom',
+      'nom_site',
+      'usine_label',
+      'usine_name',
+      'usine_nom',
+      'site',
+      'usine',
+    ];
+
+    for (const key of directKeys) {
+      const label = this.extractSiteName(raw[key]);
+      if (label) return label;
+    }
+
+    const nestedKeys = ['current_site', 'current_usine', 'default_site', 'default_usine'];
+    for (const key of nestedKeys) {
+      const label = this.extractSiteName(raw[key]);
+      if (label) return label;
+    }
+
+    const listKeys = ['sites', 'usines', 'accessible_sites', 'accessible_usines'];
+    for (const key of listKeys) {
+      const value = raw[key];
+      if (!Array.isArray(value) || value.length === 0) continue;
+
+      const preferred = value.find((entry) => this.isDefaultSiteEntry(entry)) ?? value[0];
+      const label = this.extractSiteName(preferred);
+      if (label) return label;
+    }
+
+    return null;
+  }
+
+  private extractPreferredSiteIdFromList(value: unknown): number | null {
+    if (!Array.isArray(value) || value.length === 0) return null;
+
+    const preferred = value.find((entry) => this.isDefaultSiteEntry(entry)) ?? value[0];
+    return this.extractSiteId(preferred);
+  }
+
+  private isDefaultSiteEntry(value: unknown): boolean {
+    if (!value || typeof value !== 'object') return false;
+    const raw = value as Record<string, unknown>;
+
+    if (raw['is_default'] === true || raw['default'] === true) return true;
+
+    const pivot = raw['pivot'];
+    if (!pivot || typeof pivot !== 'object') return false;
+    const rawPivot = pivot as Record<string, unknown>;
+    return rawPivot['is_default'] === true || rawPivot['default'] === true;
+  }
+
+  private extractSiteId(value: unknown): number | null {
+    if (!value || typeof value !== 'object') return null;
+    const raw = value as Record<string, unknown>;
+    return (
+      this.toNumberOrNull(raw['id']) ??
+      this.toNumberOrNull(raw['site_id']) ??
+      this.toNumberOrNull(raw['usine_id'])
+    );
+  }
+
+  private extractSiteName(value: unknown): string | null {
+    if (typeof value === 'string') return this.toStringValue(value);
+    if (!value || typeof value !== 'object') return null;
+
+    const raw = value as Record<string, unknown>;
+    const keys = ['nom', 'name', 'label', 'site_name', 'site_nom', 'usine_name', 'usine_nom'];
+    for (const key of keys) {
+      const label = this.toStringValue(raw[key]);
+      if (label) return label;
+    }
+
+    return null;
+  }
+
+  private toStringValue(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
 
   private capitalize(value: string): string {
@@ -469,6 +671,8 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
       prenom: '',
       phone: '',
       email: '',
+      organisation_id: null,
+      site_id: null,
       code_pays: 'GN',
       pays: this.getCountryName('GN'),
       ville: 'Conakry',
@@ -518,7 +722,9 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     this.setFormError(null);
     this.phonePrefixError = null;
     this.loadedUser = null;
+    this.pendingSiteLabel = null;
     this.model = this.getDefaultModel();
+    this.refreshSiteOptions();
   }
 
   private setFormError(message: string | null, details: string[] = []): void {
@@ -558,53 +764,138 @@ export class UtilisateurFormDialog implements OnInit, OnChanges {
     const selectedCountry = this.getCountryName(this.model.code_pays);
     const selectedDialDigits = selectedDialCode.replace('+', '');
 
-    let sanitized = rawPhone.trim().replace(/[^\d+]/g, '');
+    const rawTrimmed = rawPhone.trim();
+    let digitsOnly = rawTrimmed.replace(/\D/g, '');
 
-    if (sanitized.startsWith('00')) {
-      sanitized = `+${sanitized.slice(2)}`;
-    }
-
-    if (!sanitized) {
+    if (!digitsOnly) {
       this.phonePrefixError = 'Telephone obligatoire.';
       return false;
     }
 
-    if (sanitized.startsWith('+')) {
-      if (!sanitized.startsWith(selectedDialCode)) {
-        const detectedCountry = COUNTRIES.find(
-          (country) => country.code !== this.model.code_pays && sanitized.startsWith(country.dialCode)
-        );
-
-        this.phonePrefixError = detectedCountry
-          ? `Le numero commence par ${detectedCountry.dialCode} (${detectedCountry.name}) mais le pays selectionne est ${selectedCountry} (${selectedDialCode}).`
-          : `Le numero doit commencer par ${selectedDialCode} pour le pays selectionne (${selectedCountry}).`;
-        return false;
-      }
-
-      this.model.phone = sanitized;
-      this.phonePrefixError = null;
-      return true;
+    if (digitsOnly.startsWith(selectedDialDigits) && digitsOnly.length > selectedDialDigits.length) {
+      digitsOnly = digitsOnly.slice(selectedDialDigits.length);
     }
 
-    if (sanitized.startsWith(selectedDialDigits)) {
-      this.model.phone = `+${sanitized}`;
-      this.phonePrefixError = null;
-      return true;
-    }
-
-    const detectedWithoutPlus = COUNTRIES.find((country) => {
+    const detectedOtherCountry = COUNTRIES.find((country) => {
       if (country.code === this.model.code_pays) return false;
       const dialDigits = country.dialCode.replace('+', '');
-      return sanitized.startsWith(dialDigits);
+      return digitsOnly.startsWith(dialDigits) && digitsOnly.length > dialDigits.length + 3;
     });
 
-    if (detectedWithoutPlus) {
-      this.phonePrefixError = `Le numero commence par ${detectedWithoutPlus.dialCode} (${detectedWithoutPlus.name}). Selectionnez ce pays ou corrigez le prefixe.`;
+    if (detectedOtherCountry && (rawTrimmed.startsWith('+') || rawTrimmed.startsWith('00'))) {
+      this.phonePrefixError = `Le numero commence par ${detectedOtherCountry.dialCode} (${detectedOtherCountry.name}). Selectionnez ce pays ou corrigez le prefixe.`;
       return false;
     }
 
-    this.model.phone = `${selectedDialCode}${sanitized}`;
+    this.model.phone = digitsOnly;
     this.phonePrefixError = null;
     return true;
+  }
+
+  private loadOrganisations(): void {
+    this.organisationService.getAll().subscribe({
+      next: (organisations) => {
+        this.organisationOptions = organisations.map((organisation) => ({
+          label: organisation.nom,
+          value: organisation.id,
+        }));
+      },
+      error: () => {
+        this.organisationOptions = [];
+      },
+    });
+  }
+
+  private loadSites(): void {
+    this.usineService.getAll().subscribe({
+      next: (response) => {
+        this.allSites = this.extractSitesFromResponse(response)
+          .slice()
+          .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+        this.refreshSiteOptions();
+      },
+      error: () => {
+        this.allSites = [];
+        this.refreshSiteOptions();
+      },
+    });
+  }
+
+  private refreshSiteOptions(): void {
+    if (this.allSites.length === 0) {
+      this.siteOptions = [];
+      return;
+    }
+
+    const organisationId = this.model.organisation_id;
+    const hasOrganisationData = this.allSites.some((site) => this.resolveSiteOrganisationId(site) !== null);
+
+    let filteredSites = this.allSites;
+    if (organisationId && hasOrganisationData) {
+      filteredSites = this.allSites.filter((site) => this.resolveSiteOrganisationId(site) === organisationId);
+      if (filteredSites.length === 0) {
+        filteredSites = this.allSites;
+      }
+    }
+
+    this.siteOptions = filteredSites.map((site) => ({
+      label: site.nom,
+      value: site.id,
+    }));
+
+    if (!this.model.site_id && this.pendingSiteLabel) {
+      const normalizedPendingLabel = this.pendingSiteLabel.trim().toLowerCase();
+      const matchingSite = this.siteOptions.find(
+        (site) => site.label.trim().toLowerCase() === normalizedPendingLabel,
+      );
+      if (matchingSite) {
+        this.model.site_id = matchingSite.value;
+        this.pendingSiteLabel = null;
+      }
+    }
+
+    if (!this.model.site_id && this.mode === 'edit' && organisationId && this.siteOptions.length === 1) {
+      this.model.site_id = this.siteOptions[0].value;
+    }
+
+    if (this.model.site_id && !this.siteOptions.some((site) => site.value === this.model.site_id)) {
+      this.model.site_id = null;
+    }
+  }
+
+  private toNumberOrNull(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  private resolveSiteOrganisationId(site: Usine): number | null {
+    const raw = site as Usine & { organisation?: { id?: unknown } | null };
+    return this.toNumberOrNull(raw.organisation_id) ?? this.toNumberOrNull(raw.organisation?.id);
+  }
+
+  private extractSitesFromResponse(response: unknown): Usine[] {
+    const data = (response as { data?: unknown })?.data;
+    if (Array.isArray(data)) return data as Usine[];
+
+    const nestedData = (data as { data?: unknown })?.data;
+    if (Array.isArray(nestedData)) return nestedData as Usine[];
+
+    return [];
+  }
+
+  private toLocalPhone(phone: string, codeCountry: string): string {
+    const dialCode = this.getCodePhonePays(codeCountry);
+    const dialDigits = dialCode.replace('+', '');
+    let digits = (phone || '').replace(/\D/g, '');
+
+    if (digits.startsWith(dialDigits) && digits.length > dialDigits.length) {
+      digits = digits.slice(dialDigits.length);
+    }
+
+    return digits;
   }
 }

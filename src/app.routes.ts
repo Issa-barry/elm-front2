@@ -16,10 +16,16 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'E-Commerce Dashboard' }
             },
             {
-                path: '',
+                path: 'banking',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then((c) => c.BankingDashboard),
                 data: { breadcrumb: 'Banking Dashboard' }
             },
+             {
+                path: '',
+                loadComponent: () => import('./app/pages/dashboards/ventedashboard/ventedashboard').then((c) => c.Ventedashboard),
+                data: { breadcrumb: 'Banking Dashboard' }
+            },
+             
             {
                 path: 'uikit',
                 data: { breadcrumb: 'UI Kit' },

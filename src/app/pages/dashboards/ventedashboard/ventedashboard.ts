@@ -14,7 +14,10 @@ import {
   VentesEncaissementsPeriod,
 } from '@/services/dashboard/dashboard.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
-
+ import { caParStatutWidget } from '../widgets/caparstatutwidget';
+import { DonughtWiget } from '../widgets/donught-wiget/donught-wiget';
+import { BarWiget } from '../widgets/bar-wiget/bar-wiget';
+ 
 @Component({
   selector: 'app-ventedashboard',
   standalone: true,
@@ -27,6 +30,9 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
     RecentTransactionsTwoWidget,
     MonthlyPaymentsWidget,
     SoldeCardWidget,
+     caParStatutWidget,
+    DonughtWiget, 
+    BarWiget
   ],
   providers: [ProductService],
   templateUrl: './ventedashboard.html',
@@ -69,7 +75,7 @@ export class Ventedashboard implements OnInit {
 
   cardsLoading = true;
 
-  encaissementPeriod: VentesEncaissementsPeriod = 'this_month';
+  encaissementPeriod: VentesEncaissementsPeriod = 'today';
   totalFacturesMontant = 0;
   totalFacturesCount = 0;
   facturesPayeesMontant = 0;

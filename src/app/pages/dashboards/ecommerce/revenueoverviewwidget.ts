@@ -16,7 +16,7 @@ interface Week {
     imports: [SelectModule, ChartModule, FormsModule],
     template: ` <div class="card h-full">
         <div class="flex items-start justify-between mb-12">
-            <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Revenue Overview</span>
+            <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Statistiques Packing</span>
             <p-select [options]="weeks" [(ngModel)]="selectedWeek" class="w-40" optionLabel="label" (onChange)="onWeekChange()"></p-select>
         </div>
         <p-chart type="bar" height="300" [data]="barData()" [options]="barOptions()"></p-chart>

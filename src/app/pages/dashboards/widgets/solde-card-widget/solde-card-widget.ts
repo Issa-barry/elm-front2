@@ -1,4 +1,5 @@
-﻿import { CommonModule } from '@angular/common';
+﻿import { MoneyPipe } from '@/app/pipes/money.pipe';
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { SkeletonModule } from 'primeng/skeleton';
 
@@ -8,7 +9,7 @@ export type StatValueFormat = 'number' | 'text';
 @Component({
   selector: 'app-solde-card-widget',
   standalone: true,
-  imports: [CommonModule, SkeletonModule],
+  imports: [CommonModule, SkeletonModule, MoneyPipe],
   templateUrl: './solde-card-widget.html',
   styleUrl: './solde-card-widget.scss',
   host: {

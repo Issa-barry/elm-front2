@@ -10,22 +10,25 @@ export const appRoutes: Routes = [
         component: AppLayout,
         canActivate: [authGuard],
         children: [
+
+            {
+                path: '',
+                loadComponent: () => import('./app/pages/dashboards/ventedashboard/ventedashboard').then((c) => c.Ventedashboard),
+                data: { breadcrumb: 'Ventes Dashboard' }
+            },
+
             {
                 path: 'stats',
-                loadComponent: () => import('./app/pages/dashboards/ecommercedashboard').then((c) => c.EcommerceDashboard),
-                data: { breadcrumb: 'E-Commerce Dashboard' }
+                loadComponent: () => import('./app/pages/dashboards/stats-dashboard/stats-dashboard').then((c) => c.StatsDashboard),
+                data: { breadcrumb: 'Stats Dashboard' }
             },
+
             {
                 path: 'banking',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then((c) => c.BankingDashboard),
                 data: { breadcrumb: 'Banking Dashboard' }
             },
-             {
-                path: '',
-                loadComponent: () => import('./app/pages/dashboards/ventedashboard/ventedashboard').then((c) => c.Ventedashboard),
-                data: { breadcrumb: 'Banking Dashboard' }
-            },
-             
+
             {
                 path: 'uikit',
                 data: { breadcrumb: 'UI Kit' },
@@ -40,19 +43,19 @@ export const appRoutes: Routes = [
                 path: 'pages',
                 loadChildren: () => import('@/app/pages/pages.routes')
             },
-             {
+            {
                 path: 'produits',
                 loadChildren: () => import('@/app/pages/produits/produits.routes')
             },
-             {
+            {
                 path: 'vehicules',
                 loadChildren: () => import('@/app/pages/vehicules/vehicules.routes')
             },
-              {
+            {
                 path: 'contacts',
                 loadChildren: () => import('@/app/pages/contacts/contacts.routes')
             },
-              {
+            {
                 path: 'packings',
                 loadChildren: () => import('@/app/pages/packings/packings.routes')
             },

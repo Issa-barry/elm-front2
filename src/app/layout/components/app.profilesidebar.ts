@@ -107,5 +107,6 @@ export class AppProfileSidebar {
 
     logout(): void {
         this.authService.logout().subscribe({ error: () => {} });
+         this.onDrawerHide();
     }
 }

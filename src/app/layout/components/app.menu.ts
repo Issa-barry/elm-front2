@@ -32,7 +32,7 @@ export class AppMenu {
                 {
                     label: 'Stats',
                     icon: 'pi pi-fw pi-chart-bar',
-                    routerLink: ['/dashboard-banking']
+                    routerLink: ['/stats']
                 }
             ]
         },

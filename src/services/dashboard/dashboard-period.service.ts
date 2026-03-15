@@ -10,23 +10,26 @@ export type DashboardPeriod =
   | 'last_x_days';
 
 export const PERIOD_LABELS: Record<DashboardPeriod, string> = {
-  today:       "Aujourd'hui",
-  yesterday:   'Hier',
-  this_week:   'Cette semaine',
-  last_week:   'Semaine dernière',
-  this_month:  'Ce mois',
-  last_month:  'Mois dernier',
-  q1: 'T1 (Jan–Mar)', q2: 'T2 (Avr–Jun)',
-  q3: 'T3 (Jul–Sep)', q4: 'T4 (Oct–Déc)',
-  s1: 'S1 (Jan–Jun)', s2: 'S2 (Jul–Déc)',
-  this_year:   'Cette année',
-  last_year:   'Année dernière',
+  today: "Aujourd'hui",
+  yesterday: 'Hier',
+  this_week: 'Cette semaine',
+  last_week: 'Semaine derniere',
+  this_month: 'Ce mois',
+  last_month: 'Mois dernier',
+  q1: 'T1 (Jan-Mar)',
+  q2: 'T2 (Avr-Jun)',
+  q3: 'T3 (Jul-Sep)',
+  q4: 'T4 (Oct-Dec)',
+  s1: 'S1 (Jan-Jun)',
+  s2: 'S2 (Jul-Dec)',
+  this_year: 'Cette annee',
+  last_year: 'Annee derniere',
   last_x_days: 'X derniers jours',
 };
 
 @Injectable({ providedIn: 'root' })
 export class DashboardPeriodService {
-  readonly period     = signal<DashboardPeriod>('this_month');
+  readonly period = signal<DashboardPeriod>('today');
   readonly customDays = signal<number>(30);
 
   readonly currentLabel = computed(() => {

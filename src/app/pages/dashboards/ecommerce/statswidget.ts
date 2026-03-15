@@ -28,7 +28,7 @@ import { ProprietaireService } from '@/services/proprietaires/proprietaire.servi
         </div>
 
         @if (loading) {
-            @for (i of [1, 2, 3, 4, 5, 6, 7]; track i) {
+            @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
                 <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
                     <div class="card h-full">
                         <p-skeleton height="1.5rem" width="60%" />
@@ -121,6 +121,32 @@ import { ProprietaireService } from '@/services/proprietaires/proprietaire.servi
                                 <path
                                     [attr.d]="sparklinePath(stats.vehicules.sparkline)"
                                     [style]="{ strokeWidth: '2px', stroke: strokeColor(stats.vehicules.trend) }"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 xl:col-span-3 self-start">
+                <div class="card h-full">
+                    <span class="font-semibold text-lg">Sites</span>
+                    <div class="text-xs text-surface-400 mt-0.5 mb-4">{{ periodSubtitle() }}</div>
+                    <div class="flex justify-between items-start">
+                        <div class="w-6/12">
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ siteStat().value }}</span>
+                            <div [class]="trendClass(siteStat().trend)">
+                                <span class="font-medium">{{ formatDelta(siteStat().delta_pct) }}</span>
+                                @if (siteStat().trend !== 'flat') {
+                                    <i [class]="trendIcon(siteStat().trend)"></i>
+                                }
+                            </div>
+                        </div>
+                        <div class="w-6/12">
+                            <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    [attr.d]="sparklinePath(siteStat().sparkline)"
+                                    [style]="{ strokeWidth: '2px', stroke: strokeColor(siteStat().trend) }"
                                 />
                             </svg>
                         </div>
@@ -254,6 +280,12 @@ export class StatsWidget implements OnDestroy {
     loading = true;
     livreursCount = 0;
     proprietairesCount = 0;
+    private readonly defaultStat = {
+        value: 0,
+        delta_pct: null as number | null,
+        trend: 'flat' as const,
+        sparkline: [1, 1, 1, 1],
+    };
 
     private readonly cancel$ = new Subject<void>();
 
@@ -330,6 +362,10 @@ export class StatsWidget implements OnDestroy {
         if (typeof data.total === 'number' && Number.isFinite(data.total)) return data.total;
         if (Array.isArray(data.data)) return data.data.length;
         return 0;
+    }
+
+    siteStat() {
+        return this.stats?.sites ?? this.defaultStat;
     }
 
     periodSubtitle(): string {

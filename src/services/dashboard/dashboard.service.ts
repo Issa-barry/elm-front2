@@ -7,6 +7,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 export interface StatCard {
     value: number;
     delta_pct: number | null;
+    delta_count?: number | null;
     trend: 'up' | 'down' | 'flat';
     sparkline: number[];
 }
@@ -104,6 +105,7 @@ export interface DashboardStats {
     packings: StatCard;
     utilisateurs: StatCard;
     vehicules: StatCard;
+    sites?: StatCard;
     rouleaux_stock: StatCard;
     vehicules_par_type: VehiculeParType[];
 }

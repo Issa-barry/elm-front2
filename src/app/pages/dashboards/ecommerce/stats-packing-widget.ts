@@ -50,7 +50,7 @@ export class StatsPackingWidget implements OnInit {
         { label: 'Annee derniere', value: 'last_year' },
     ];
 
-    selectedPeriod = 'today';
+    selectedPeriod = 'this_week';
 
     barData: any = { labels: [], datasets: [] };
     barOptions: any = {};

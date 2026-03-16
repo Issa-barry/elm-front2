@@ -164,7 +164,7 @@
         <aside class="w-full md:w-[420px] xl:w-[480px] h-full bg-surface-0 dark:bg-surface-900 border-l border-surface-200 dark:border-surface-700 flex flex-col">
             <div class="px-6 py-4 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
                 <div class="text-lg font-semibold text-surface-900 dark:text-surface-0">Panier</div>
-                <button pButton [text]="true" [rounded]="true" class="w-9 h-9">
+                <button pButton [text]="true" [rounded]="true" class="w-9 h-9" (click)="closePos()">
                     <i pButtonIcon class="pi pi-times"></i>
                 </button>
             </div>

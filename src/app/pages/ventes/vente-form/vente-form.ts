@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -223,7 +224,8 @@ export class VenteForm implements OnInit {
 
   constructor(
     private vehiculeService: VehiculeService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -412,6 +414,10 @@ export class VenteForm implements OnInit {
       return;
     }
     item.qty = next;
+  }
+
+  closePos(): void {
+    this.router.navigate(['/ventes']);
   }
 
   formatGnf(value: number): string {

@@ -403,6 +403,17 @@ export class VenteForm implements OnInit {
     this.posCartItems = this.posCartItems.filter((item) => item.id !== itemId);
   }
 
+  updateCartQty(itemId: number, delta: number): void {
+    const item = this.posCartItems.find((i) => i.id === itemId);
+    if (!item) return;
+    const next = item.qty + delta;
+    if (next <= 0) {
+      this.removeFromCart(itemId);
+      return;
+    }
+    item.qty = next;
+  }
+
   formatGnf(value: number): string {
     return new Intl.NumberFormat('fr-FR').format(value) + ' GNF';
   }

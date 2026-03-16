@@ -1,0 +1,292 @@
+<p-toast />
+
+@if (loading()) {
+    <div class="flex items-center justify-center py-12 text-surface-500">
+        <i class="pi pi-spin pi-spinner text-2xl"></i>
+    </div>
+} @else if (!commande()) {
+    <div class="flex flex-col items-center gap-3 py-12 text-surface-500">
+        <i class="pi pi-inbox text-3xl"></i>
+        <span>Vente introuvable.</span>
+        <p-button label="Retour" icon="pi pi-arrow-left" [text]="true" (onClick)="goBack()" />
+    </div>
+} @else {
+    <div class="cv-detail2-wrapper">
+        <div class="cv-detail2-mobile-header">
+            <div class="cv-detail2-mobile-back-trigger">
+                <p-button [text]="true" [rounded]="true" icon="pi pi-arrow-left" styleClass="cv-detail2-mobile-back" (onClick)="goBack()" />
+            </div>
+            <div class="cv-detail2-mobile-title-wrap">
+                <h1 class="cv-detail2-mobile-title">Vente</h1>
+                <p class="cv-detail2-mobile-subtitle">{{ commande()?.reference }}</p>
+            </div>
+            <div class="cv-detail2-mobile-spacer"></div>
+        </div>
+
+        <div class="cv-detail2-content">
+            <div class="cv-detail2-card">
+                <div class="cv-detail2-hero">
+                    <div class="cv-detail2-hero-left">
+                        <h2 class="cv-detail2-hero-title">
+                            Total de commande = {{ commande()?.total_commande | money }}
+                        </h2>
+                        <div class="cv-detail2-hero-ref">N° {{ commande()?.reference }}.</div>
+                        <div class="cv-detail2-hero-sub">
+                            Creee le {{ formatDateTime(commande()?.created_at) }}
+                        </div>
+
+                        @if (commande()?.facture) {
+                            <p-button label="Voir la facture" icon="pi pi-file" [outlined]="true" size="small" (onClick)="goFacture()" />
+                        }
+                    </div>
+
+                    <div class="cv-detail2-hero-actions">
+                        @if (restantDu() > 0) {
+                            <p-button label="Encaisser" icon="pi pi-wallet" (onClick)="openEncaissementDialog()" />
+                        }
+                        @if (canAnnuler()) {
+                            <p-button label="Annuler" icon="pi pi-ban" severity="danger" [outlined]="true" (onClick)="openAnnulationDialog()" />
+                        }
+                    </div>
+                </div>
+
+                <div class="cv-detail2-mobile-total">
+                    <div class="cv-detail2-mobile-total-amount">{{ commande()?.total_commande | money }}</div>
+                    <div class="cv-detail2-mobile-total-label">Total commande</div>
+                </div>
+
+                @if (annulationInfo()) {
+                    <div class="cv-detail2-annulation-card">
+                        <div class="cv-detail2-annulation-title">
+                            <i class="pi pi-ban"></i> Commande annulee
+                        </div>
+                        <div class="cv-detail2-annulation-text">
+                            Motif : {{ annulationInfo()?.motif_annulation || '-' }}
+                        </div>
+                        <div class="cv-detail2-annulation-date">
+                            Annulee le {{ formatDateTime(annulationInfo()?.annulee_at ?? undefined) }}
+                        </div>
+                    </div>
+                }
+
+                <div class="cv-detail2-info-card">
+                    <div class="cv-detail2-info-header">
+                        <i class="pi pi-info-circle"></i>
+                        Informations
+                    </div>
+                    <div class="cv-detail2-info-grid">
+                        <div class="cv-detail2-info-col">
+                            <div class="cv-detail2-info-title">Resume</div>
+                            <div class="cv-detail2-info-line">
+                                <span class="cv-detail2-info-label">Date creation :</span>
+                                <span>{{ informationPanel()?.createdAtLabel ?? '-' }}</span>
+                            </div>
+                            <div class="cv-detail2-info-line">
+                                <span class="cv-detail2-info-label">Cree par :</span>
+                                <span>{{ informationPanel()?.creatorPrenom }} {{ informationPanel()?.creatorNom }}</span>
+                            </div>
+                            <div class="cv-detail2-info-line">
+                                <span class="cv-detail2-info-label">Phone :</span>
+                                <span>
+                                    {{ informationPanel()?.creatorPhone !== '-' ? (informationPanel()?.creatorPhone | phoneFormat) : '-' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="cv-detail2-info-col">
+                            <div class="cv-detail2-info-title">Vehicule</div>
+                            <div class="cv-detail2-info-line">
+                                <span class="cv-detail2-info-label">Nom vehicule :</span>
+                                <span>{{ informationPanel()?.vehiculeNom ?? '-' }}</span>
+                            </div>
+                            <div class="cv-detail2-info-line">
+                                <span class="cv-detail2-info-label">Immatriculation :</span>
+                                <span>{{ informationPanel()?.vehiculeImmatriculation ?? '-' }}</span>
+                            </div>
+                        </div>
+                        <div class="cv-detail2-info-col">
+                            <div class="cv-detail2-info-title">Livreur</div>
+                            <div class="cv-detail2-info-line">
+                                <span>{{ informationPanel()?.livreurNom ?? '-' }}</span>
+                            </div>
+                            <div class="cv-detail2-info-line">
+                                <span>
+                                    {{ informationPanel()?.livreurPhone !== '-' ? (informationPanel()?.livreurPhone | phoneFormat) : '-' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cv-detail2-products">
+                    <div class="cv-detail2-products-header">
+                        <span class="cv-detail2-products-title">Produits</span>
+                        <span class="cv-detail2-products-count">{{ products().length }} ligne(s)</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        @for (product of products(); track product.id) {
+                            <div class="cv-detail2-product-row">
+                                <img class="cv-detail2-product-thumb" [src]="product.imageUrl" alt="" />
+                                <div class="cv-detail2-product-meta">
+                                    <div class="cv-detail2-product-name">{{ product.name }}</div>
+                                    <div class="cv-detail2-product-sub">
+                                        Prix unitaire : {{ product.unitPrice | money }}
+                                    </div>
+                                </div>
+                                <div class="cv-detail2-product-amount">
+                                    <div class="cv-detail2-product-total">{{ product.totalLigne | money }}</div>
+                                    <div class="cv-detail2-product-qty">{{ product.quantity }} unite(s)</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="cv-detail2-summary">
+                    <div class="cv-detail2-summary-row">
+                        <span>Statut</span>
+                        <span>{{ statutLabel() }}</span>
+                    </div>
+                    <div class="cv-detail2-summary-row">
+                        <span>Deja encaisse</span>
+                        <span>{{ commande()?.facture?.montant_encaisse | money }}</span>
+                    </div>
+                    <div class="cv-detail2-summary-row cv-detail2-summary-row--total">
+                        <span>Restant a encaisser</span>
+                        <span>{{ restantDu() | money }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-detail2-mobile-bottom-actions">
+                <div class="flex flex-col gap-2">
+                    @if (restantDu() > 0) {
+                        <p-button label="Encaisser" icon="pi pi-wallet" (onClick)="openEncaissementDialog()" />
+                    }
+                    @if (canAnnuler()) {
+                        <p-button label="Annuler" icon="pi pi-ban" severity="danger" [outlined]="true" (onClick)="openAnnulationDialog()" />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<p-dialog
+    header="Encaisser"
+    [(visible)]="encaissementDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    styleClass="cv-encaissement-dialog"
+    [style]="{ width: '32rem' }"
+>
+    <div class="flex flex-col gap-4 py-2">
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Montant</label>
+            <p-inputNumber
+                [(ngModel)]="encaissementMontant"
+                [min]="0"
+                [useGrouping]="true"
+                styleClass="w-full cv-encaissement-montant"
+                inputStyleClass="w-full text-center"
+            />
+            <small class="cv-encaissement-restant">Restant : {{ restantDu() | money }}</small>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Mode de paiement</label>
+            <p-select
+                [options]="modePaiementOptions"
+                [(ngModel)]="encaissementMode"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Choisir..."
+                styleClass="w-full cv-encaissement-control"
+            />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Date d'encaissement</label>
+            <p-datepicker
+                [(ngModel)]="encaissementDate"
+                dateFormat="dd/mm/yy"
+                styleClass="w-full cv-encaissement-control"
+            />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Note (optionnel)</label>
+            <textarea
+                rows="3"
+                maxlength="500"
+                placeholder="Ajouter une note..."
+                [value]="encaissementNote"
+                (input)="encaissementNote = $any($event.target).value"
+                class="w-full text-sm"
+                style="border: 1px solid var(--p-surface-300); border-radius: 6px; padding: 0.5rem; resize: none; outline: none; font-family: inherit; background: var(--p-surface-0); color: var(--p-surface-900);"
+            ></textarea>
+            <small class="text-surface-400">{{ encaissementNote.length }}/500 caracteres</small>
+        </div>
+    </div>
+    <ng-template #footer>
+        <div class="cv-encaissement-footer">
+            <p-button
+                label="Annuler"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="encaissementDialogVisible = false"
+                [disabled]="encaissementLoading"
+            />
+            <p-button
+                label="Confirmer"
+                icon="pi pi-check"
+                (onClick)="confirmerEncaissement()"
+                [loading]="encaissementLoading"
+                [disabled]="!encaissementMontant || !encaissementMode"
+            />
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    header="Annuler la commande"
+    [(visible)]="annulationDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '32rem' }"
+>
+    <div class="flex flex-col gap-4 py-2">
+        <div class="flex items-start gap-3">
+            <i class="pi pi-ban text-red-500 text-3xl flex-shrink-0 mt-0.5"></i>
+            <p class="m-0 text-sm">
+                Annuler la commande <strong>{{ commande()?.reference }}</strong> ?
+            </p>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Motif d'annulation <span class="text-red-500">*</span></label>
+            <textarea
+                rows="3"
+                maxlength="500"
+                placeholder="Indiquez le motif de l'annulation..."
+                [value]="motifAnnulation"
+                (input)="motifAnnulation = $any($event.target).value"
+                class="w-full text-sm"
+                style="border: 1px solid var(--p-surface-300); border-radius: 6px; padding: 0.5rem; resize: none; outline: none; font-family: inherit; background: var(--p-surface-0); color: var(--p-surface-900);"
+            ></textarea>
+            <small class="text-surface-400">{{ motifAnnulation.length }}/500 caracteres</small>
+        </div>
+    </div>
+    <ng-template #footer>
+        <p-button
+            label="Retour"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="annulationDialogVisible = false"
+            [disabled]="annulationLoading"
+        />
+        <p-button
+            label="Confirmer l'annulation"
+            icon="pi pi-ban"
+            severity="danger"
+            (onClick)="confirmerAnnulation()"
+            [loading]="annulationLoading"
+            [disabled]="!motifAnnulation.trim()"
+        />
+    </ng-template>
+</p-dialog>

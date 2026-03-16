@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -43,6 +43,8 @@ export class ProduitForm implements OnInit, OnChanges {
     private usineCtx = inject(UsineContextService);
     readonly currentUsine = this.usineCtx.currentUsine;
 
+    isMobileView = signal(typeof window !== 'undefined' && window.innerWidth <= 768);
+
     product: Produit = this.emptyProduct();
     isEditing = false;
     submitted = false;
@@ -60,6 +62,11 @@ export class ProduitForm implements OnInit, OnChanges {
         { label: 'Fabricable', value: 'fabricable' },
         { label: 'Achat / Vente', value: 'achat_vente' },
     ];
+
+    @HostListener('window:resize')
+    onResize(): void {
+        this.isMobileView.set(window.innerWidth <= 768);
+    }
 
     ngOnInit(): void {
         if (this.mode === 'create') {

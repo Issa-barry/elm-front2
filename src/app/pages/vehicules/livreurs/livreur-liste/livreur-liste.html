@@ -1,147 +1,272 @@
-<div class="flex flex-col bg-surface-0 dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
-            <!-- Header -->
-            <div class="px-6 py-5 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Livreurs</h1>
+@if (isMobileView) {
+    <div class="livreurs-mobile-app">
+        <header class="mobile-header">
+            <button
+                pButton
+                pRipple
+                icon="pi pi-arrow-left"
+                class="p-button-rounded p-button-text mobile-back"
+                aria-label="Retour"
+                (click)="goBack()"
+            ></button>
 
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                   <p-iconfield class="w-full sm:w-[217px]">
-                        <p-inputicon styleClass="pi pi-search" />
-                        <input
-                            pInputText
-                            [ngModel]="searchValue()"
-                            (ngModelChange)="onSearchChange($event)"
-                            placeholder="Rechercher"
-                            class="w-full! py-2! rounded-xl!"
-                        />
-                    </p-iconfield>
-                    
-                    <p-select
-                        [ngModel]="selectedFilter()"
-                        (ngModelChange)="onFilterChange($event)"
-                        [options]="filterOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Tous"
-                        class="w-full sm:w-[170px]"
-                        appendTo="body"
+            <div class="mobile-title-wrap">
+                <h1 class="mobile-title">Livreurs</h1>
+                <p class="mobile-subtitle">
+                    {{ filteredUsers().length }} livreur{{ filteredUsers().length > 1 ? 's' : '' }}
+                </p>
+            </div>
+
+            <button
+                pButton
+                pRipple
+                icon="pi pi-plus"
+                class="p-button-rounded p-button-text mobile-add"
+                aria-label="Nouveau livreur"
+                (click)="addNewUser()"
+            ></button>
+        </header>
+
+        <div class="mobile-scroll">
+            <section class="mobile-search-row">
+                <p-iconfield iconPosition="left" class="mobile-search-field">
+                    <p-inputicon class="pi pi-search"></p-inputicon>
+                    <input
+                        pInputText
+                        [ngModel]="searchValue()"
+                        (ngModelChange)="onSearchChange($event)"
+                        placeholder="Rechercher un livreur..."
+                        class="w-full"
                     />
+                </p-iconfield>
 
-                    <p-button icon="pi pi-plus" label="Nouveau" severity="primary" [rounded]="true" class="w-full sm:w-auto cursor-pointer" (onClick)="addNewUser()" />
-                </div>
-            </div>
+                <p-menu #mobileFilterMenu [model]="mobileFilterMenuItems" [popup]="true" appendTo="body" styleClass="mobile-filter-menu" />
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-filter"
+                    class="p-button-rounded p-button-text mobile-filter-btn"
+                    aria-label="Filtres"
+                    (click)="mobileFilterMenu.toggle($event)"
+                ></button>
+            </section>
 
-            <!-- Table -->
-            <div class="flex-1 px-6 py-5">
-                <p-table
-                    [value]="filteredUsers()"
-                    [(selection)]="selectedUsers"
-                    [paginator]="true"
-                    [rows]="rows"
-                    [first]="first"
-                    sortMode="multiple"
-                    [tableStyle]="{ width: '100%' }"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-                    currentPageReportTemplate="Shows {first} to {last} of {totalRecords} results"
-                    class="bg-surface-0 dark:bg-surface-800 overflow-hidden"
-                    [pt]="{ pcPaginator: { root: { class: 'rounded-none!' } } }"
-                >
-                    <ng-template #header>
-                        <tr>
-                            <th style="width: 3rem">
-                                <p-tableHeaderCheckbox />
-                            </th>
-                            <th pSortableColumn="name" class="flex-1">
-                                <span class="flex items-center gap-2">Nom  <p-sortIcon field="name" /></span>
-                            </th>
-                            <th pSortableColumn="role" class="flex-1">
-                                <span class="flex items-center gap-2">Téléphone <p-sortIcon field="role" /></span>
-                            </th> 
-                            <th pSortableColumn="status" class="flex-1">
-                                <span class="flex items-center gap-2">Statut <p-sortIcon field="status" /></span>
-                            </th>
-                             <th pSortableColumn="status" class="flex-1">
-                                <span class="flex items-center gap-2">Ajouté <p-sortIcon field="status" /></span>
-                            </th>
-                            <th style="width: 6rem">Actions</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template #body let-user>
-                        <tr>
-                            <td style="width: 3rem">
-                                <p-tableCheckbox [value]="user" />
-                            </td>
-                            <td>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-100 text-xs font-semibold flex items-center justify-center">
-                                        {{ getInitials(user.name) }}
+            @if (loading) {
+                <section class="mobile-list">
+                    @for (_ of [1, 2, 3]; track $index) {
+                        <article class="mobile-livreur-card">
+                            <p-skeleton shape="circle" size="2.75rem" />
+                            <div class="mobile-card-body">
+                                <p-skeleton width="60%" height="0.9rem" styleClass="mb-2" />
+                                <p-skeleton width="42%" height="0.75rem" styleClass="mb-3" />
+                                <div class="mobile-card-footer">
+                                    <p-skeleton width="5rem" height="0.85rem" />
+                                    <p-skeleton width="4.2rem" height="0.85rem" />
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </section>
+            }
+
+            @if (!loading && filteredUsers().length > 0) {
+                <section class="mobile-list">
+                    @for (user of filteredUsers(); track user.id) {
+                        <article class="mobile-livreur-card" (click)="handleCardClick(user)">
+                            <div class="mobile-card-avatar">
+                                {{ getInitials(user.name) }}
+                            </div>
+
+                            <div class="mobile-card-body">
+                                <div class="mobile-card-header">
+                                    <div class="mobile-card-title-wrap">
+                                        <p class="mobile-card-code">{{ user.phone ? (user.phone | phoneFormat) : '-' }}</p>
+                                        <h3 class="mobile-card-title">{{ user.name }}</h3>
                                     </div>
-                                    <span class="text-surface-950 dark:text-surface-0 text-sm font-medium leading-tight">{{ user.name }}</span>
+                                    <p-tag
+                                        [value]="user.status"
+                                        [severity]="getStatusSeverity(user.status)"
+                                        class="mobile-status-tag"
+                                    />
                                 </div>
-                            </td>
-                            <td>
-                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ user.phone | phoneFormat }}</span>
-                            </td>
-                             <td>
-                                <p-tag [value]="user.status" [severity]="getStatusSeverity(user.status)" class="px-2 py-1 rounded-[6px]" />
-                            </td>
-                          
-                            <td>
-                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ formatDate(user.created_at) }}</span>
-                            </td>
-                           
-                            <td>
-                                <div class="flex items-center gap-1">
-                                    <p-button (onClick)="toggleMenu($event, user.id)" [rounded]="true" [text]="true" icon="pi pi-ellipsis-h" size="small" severity="secondary" class="cursor-pointer" />
+
+                                <div class="mobile-card-meta">
+                                    <span><i class="pi pi-calendar"></i> {{ formatDate(user.created_at) }}</span>
                                 </div>
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-                <p-menu #actionMenu [model]="menuItems()" [popup]="true" styleClass="w-48!" appendTo="body" />
+                            </div>
+
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-ellipsis-h"
+                                class="p-button-rounded p-button-text mobile-card-menu-btn"
+                                aria-label="Actions"
+                                (click)="toggleMenu($event, user.id); $event.stopPropagation()"
+                            ></button>
+                        </article>
+                    }
+                </section>
+            }
+
+            @if (!loading && filteredUsers().length === 0) {
+                <div class="mobile-empty">
+                    <i class="pi pi-inbox"></i>
+                    <p>Aucun livreur trouve.</p>
+                </div>
+            }
+        </div>
+
+        <button type="button" class="mobile-fab" aria-label="Nouveau livreur" (click)="addNewUser()">
+            <i class="pi pi-plus"></i>
+        </button>
+
+        <p-menu #actionMenu [model]="menuItems()" [popup]="true" styleClass="w-52!" appendTo="body" />
+        <p-confirmdialog [style]="{ width: '450px' }" />
+    </div>
+} @else {
+    <div class="livreurs-desktop flex flex-col bg-surface-0 dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Livreurs</h1>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                <p-iconfield class="w-full sm:w-[217px]">
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input
+                        pInputText
+                        [ngModel]="searchValue()"
+                        (ngModelChange)="onSearchChange($event)"
+                        placeholder="Rechercher"
+                        class="w-full! py-2! rounded-xl!"
+                    />
+                </p-iconfield>
+
+                <p-select
+                    [ngModel]="selectedFilter()"
+                    (ngModelChange)="onFilterChange($event)"
+                    [options]="filterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Tous"
+                    class="w-full sm:w-[170px]"
+                    appendTo="body"
+                />
+
+                <p-button icon="pi pi-plus" label="Nouveau" severity="primary" [rounded]="true" class="w-full sm:w-auto cursor-pointer" (onClick)="addNewUser()" />
             </div>
+        </div>
 
-            <!-- Edit User Dialog -->
-            <p-dialog [(visible)]="editDialogVisible" [modal]="true" header="Edit User" [style]="{ width: '30rem' }" styleClass="p-fluid">
-                <div class="flex flex-col gap-4 py-4">
-                    <div class="flex flex-col gap-2">
-                        <label for="name" class="text-surface-900 dark:text-surface-0 font-medium">Name</label>
-                        <input pInputText id="name" [(ngModel)]="editForm.name" class="w-full" />
-                    </div>
+        <!-- Table -->
+        <div class="flex-1 px-6 py-5">
+            <p-table
+                [value]="filteredUsers()"
+                [(selection)]="selectedUsers"
+                [paginator]="true"
+                [rows]="rows"
+                [first]="first"
+                sortMode="multiple"
+                [tableStyle]="{ width: '100%' }"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+                currentPageReportTemplate="Shows {first} to {last} of {totalRecords} results"
+                class="bg-surface-0 dark:bg-surface-800 overflow-hidden"
+                [pt]="{ pcPaginator: { root: { class: 'rounded-none!' } } }"
+            >
+                <ng-template #header>
+                    <tr>
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox />
+                        </th>
+                        <th pSortableColumn="name" class="flex-1">
+                            <span class="flex items-center gap-2">Nom  <p-sortIcon field="name" /></span>
+                        </th>
+                        <th pSortableColumn="role" class="flex-1">
+                            <span class="flex items-center gap-2">Telephone <p-sortIcon field="role" /></span>
+                        </th>
+                        <th pSortableColumn="status" class="flex-1">
+                            <span class="flex items-center gap-2">Statut <p-sortIcon field="status" /></span>
+                        </th>
+                        <th pSortableColumn="status" class="flex-1">
+                            <span class="flex items-center gap-2">Ajoute <p-sortIcon field="status" /></span>
+                        </th>
+                        <th style="width: 6rem">Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-user>
+                    <tr>
+                        <td style="width: 3rem">
+                            <p-tableCheckbox [value]="user" />
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-100 text-xs font-semibold flex items-center justify-center">
+                                    {{ getInitials(user.name) }}
+                                </div>
+                                <span class="text-surface-950 dark:text-surface-0 text-sm font-medium leading-tight">{{ user.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ user.phone | phoneFormat }}</span>
+                        </td>
+                        <td>
+                            <p-tag [value]="user.status" [severity]="getStatusSeverity(user.status)" class="px-2 py-1 rounded-[6px]" />
+                        </td>
+                        <td>
+                            <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">{{ formatDate(user.created_at) }}</span>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1">
+                                <p-button (onClick)="toggleMenu($event, user.id)" [rounded]="true" [text]="true" icon="pi pi-ellipsis-h" size="small" severity="secondary" class="cursor-pointer" />
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <p-menu #actionMenu [model]="menuItems()" [popup]="true" styleClass="w-48!" appendTo="body" />
+        </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label for="role" class="text-surface-900 dark:text-surface-0 font-medium">Role / Position</label>
-                        <p-select id="role" [(ngModel)]="editForm.role" [options]="roleOptions" placeholder="Select a role" class="w-full" appendTo="body" />
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <label for="department" class="text-surface-900 dark:text-surface-0 font-medium">Department</label>
-                        <p-select id="department" [(ngModel)]="editForm.department" [options]="departmentOptions" placeholder="Select a department" class="w-full" appendTo="body" />
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <label for="joinDate" class="text-surface-900 dark:text-surface-0 font-medium">Join Date</label>
-                        <input pInputText id="joinDate" [(ngModel)]="editForm.joinDate" class="w-full" />
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <label for="authorizationLevel" class="text-surface-900 dark:text-surface-0 font-medium">Authorization Level</label>
-                        <p-select id="authorizationLevel" [(ngModel)]="editForm.authorizationLevel" [options]="authorizationLevelOptions" placeholder="Select authorization level" class="w-full" appendTo="body" />
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <label for="status" class="text-surface-900 dark:text-surface-0 font-medium">Employment Status</label>
-                        <p-select id="status" [(ngModel)]="editForm.status" [options]="statusOptions" placeholder="Select status" class="w-full" appendTo="body" />
-                    </div>
+        <!-- Edit User Dialog -->
+        <p-dialog [(visible)]="editDialogVisible" [modal]="true" header="Edit User" [style]="{ width: '30rem' }" styleClass="p-fluid">
+            <div class="flex flex-col gap-4 py-4">
+                <div class="flex flex-col gap-2">
+                    <label for="name" class="text-surface-900 dark:text-surface-0 font-medium">Name</label>
+                    <input pInputText id="name" [(ngModel)]="editForm.name" class="w-full" />
                 </div>
 
-                <ng-template #footer>
-                    <div class="flex justify-end gap-2">
-                        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeEditDialog()" />
-                        <p-button label="Save" (onClick)="saveUser()" />
-                    </div>
-                </ng-template>
-            </p-dialog>
+                <div class="flex flex-col gap-2">
+                    <label for="role" class="text-surface-900 dark:text-surface-0 font-medium">Role / Position</label>
+                    <p-select id="role" [(ngModel)]="editForm.role" [options]="roleOptions" placeholder="Select a role" class="w-full" appendTo="body" />
+                </div>
 
-            <!-- Delete Confirmation Dialog -->
-            <p-confirmdialog [style]="{ width: '450px' }" />
-        </div>
+                <div class="flex flex-col gap-2">
+                    <label for="department" class="text-surface-900 dark:text-surface-0 font-medium">Department</label>
+                    <p-select id="department" [(ngModel)]="editForm.department" [options]="departmentOptions" placeholder="Select a department" class="w-full" appendTo="body" />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="joinDate" class="text-surface-900 dark:text-surface-0 font-medium">Join Date</label>
+                    <input pInputText id="joinDate" [(ngModel)]="editForm.joinDate" class="w-full" />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="authorizationLevel" class="text-surface-900 dark:text-surface-0 font-medium">Authorization Level</label>
+                    <p-select id="authorizationLevel" [(ngModel)]="editForm.authorizationLevel" [options]="authorizationLevelOptions" placeholder="Select authorization level" class="w-full" appendTo="body" />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="status" class="text-surface-900 dark:text-surface-0 font-medium">Employment Status</label>
+                    <p-select id="status" [(ngModel)]="editForm.status" [options]="statusOptions" placeholder="Select status" class="w-full" appendTo="body" />
+                </div>
+            </div>
+
+            <ng-template #footer>
+                <div class="flex justify-end gap-2">
+                    <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeEditDialog()" />
+                    <p-button label="Save" (onClick)="saveUser()" />
+                </div>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Delete Confirmation Dialog -->
+        <p-confirmdialog [style]="{ width: '450px' }" />
+    </div>
+}

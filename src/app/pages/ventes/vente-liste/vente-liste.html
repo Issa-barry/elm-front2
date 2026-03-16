@@ -1,8 +1,7 @@
 <p-toast />
-<p-confirmdialog [style]="{ width: '450px' }" />
 
 @if (isMobileView) {
-    <div class="prestataires-mobile-app">
+    <div class="ventes-mobile-app">
         <header class="mobile-header">
             <button
                 pButton
@@ -14,9 +13,9 @@
             ></button>
 
             <div class="mobile-title-wrap">
-                <h1 class="mobile-title">Prestataires</h1>
+                <h1 class="mobile-title">Ventes</h1>
                 <p class="mobile-subtitle">
-                    {{ filteredPrestataires().length }} prestataire{{ filteredPrestataires().length > 1 ? 's' : '' }}
+                    {{ filteredCommandes().length }} vente{{ filteredCommandes().length > 1 ? 's' : '' }}
                 </p>
             </div>
 
@@ -26,8 +25,8 @@
                     pRipple
                     icon="pi pi-plus"
                     class="p-button-rounded p-button-text mobile-add"
-                    aria-label="Nouveau prestataire"
-                    (click)="navigateToCreate()"
+                    aria-label="Nouvelle vente"
+                    (click)="goNew()"
                 ></button>
             } @else {
                 <span class="mobile-header-spacer" aria-hidden="true"></span>
@@ -42,7 +41,7 @@
                         pInputText
                         [ngModel]="searchQuery()"
                         (ngModelChange)="onSearchChange($event)"
-                        placeholder="Rechercher un prestataire..."
+                        placeholder="Rechercher une vente..."
                         class="w-full"
                     />
                 </p-iconfield>
@@ -61,7 +60,7 @@
             @if (loading) {
                 <section class="mobile-list">
                     @for (_ of [1, 2, 3]; track $index) {
-                        <article class="mobile-prestataire-card">
+                        <article class="mobile-vente-card">
                             <p-skeleton shape="circle" size="2.75rem" />
                             <div class="mobile-card-body">
                                 <p-skeleton width="60%" height="0.9rem" styleClass="mb-2" />
@@ -76,48 +75,45 @@
                 </section>
             }
 
-            @if (!loading && filteredPrestataires().length > 0) {
+            @if (!loading && filteredCommandes().length > 0) {
                 <section class="mobile-list">
-                    @for (prestataire of filteredPrestataires(); track prestataire.id) {
-                        <article class="mobile-prestataire-card" (click)="handleCardClick(prestataire)">
+                    @for (commande of filteredCommandes(); track commande.id) {
+                        <article class="mobile-vente-card" (click)="goDetails(commande)">
                             <div class="mobile-card-avatar">
-                                {{ getInitials(prestataire.nom_complet) }}
+                                <i class="pi pi-shopping-cart"></i>
                             </div>
 
                             <div class="mobile-card-body">
                                 <div class="mobile-card-header">
                                     <div class="mobile-card-title-wrap">
-                                        <p class="mobile-card-code">{{ prestataire.reference || 'Sans reference' }}</p>
-                                        <h3 class="mobile-card-title">{{ prestataire.nom_complet }}</h3>
+                                        <p class="mobile-card-code">{{ commande.reference }}</p>
+                                        <h3 class="mobile-card-title">
+                                            {{ commande.vehicule?.nom_vehicule || '-' }}
+                                        </h3>
                                     </div>
-                                    <div class="mobile-card-badges">
-                                        <p-tag
-                                            [value]="getTypeLabel(prestataire)"
-                                            [severity]="getTypeSeverity(prestataire)"
-                                            class="mobile-type-tag"
-                                        />
-                                        <p-tag
-                                            [value]="getStatusLabel(prestataire)"
-                                            [severity]="getStatusSeverity(prestataire)"
-                                            class="mobile-status-tag"
-                                        />
-                                    </div>
+                                    <p-tag
+                                        [value]="getStatutLabel(commande.facture?.statut_facture)"
+                                        [severity]="getStatutSeverity(commande.facture?.statut_facture)"
+                                        class="mobile-status-tag"
+                                    />
                                 </div>
 
                                 <div class="mobile-card-meta">
-                                    <span><i class="pi pi-phone"></i> {{ prestataire.phone ? (prestataire.phone | phoneFormat) : '-' }}</span>
-                                    <span><i class="pi pi-map-marker"></i> {{ getAddressLabel(prestataire) }}</span>
+                                    <span><i class="pi pi-car"></i> {{ commande.vehicule?.immatriculation || '-' }}</span>
+                                    <span><i class="pi pi-user"></i> {{ getLivreurName(commande) }}</span>
+                                    <span><i class="pi pi-wallet"></i> {{ formatMontant(commande.total_commande) }}</span>
+                                    <span><i class="pi pi-calendar"></i> {{ formatDate(commande.created_at) }}</span>
                                 </div>
                             </div>
 
-                            @if (canUpdate || canDelete) {
+                            @if (canRead || canUpdate || canDelete) {
                                 <button
                                     pButton
                                     pRipple
                                     icon="pi pi-ellipsis-h"
                                     class="p-button-rounded p-button-text mobile-card-menu-btn"
                                     aria-label="Actions"
-                                    (click)="toggleMenu($event, prestataire.id); $event.stopPropagation()"
+                                    (click)="toggleMenu($event, commande.id); $event.stopPropagation()"
                                 ></button>
                             }
                         </article>
@@ -125,16 +121,16 @@
                 </section>
             }
 
-            @if (!loading && filteredPrestataires().length === 0) {
+            @if (!loading && filteredCommandes().length === 0) {
                 <div class="mobile-empty">
                     <i class="pi pi-inbox"></i>
-                    <p>Aucun prestataire trouve.</p>
+                    <p>Aucune vente trouvee.</p>
                 </div>
             }
         </div>
 
         @if (canCreate) {
-            <button type="button" class="mobile-fab" aria-label="Nouveau prestataire" (click)="navigateToCreate()">
+            <button type="button" class="mobile-fab" aria-label="Nouvelle vente" (click)="goNew()">
                 <i class="pi pi-plus"></i>
             </button>
         }
@@ -142,9 +138,9 @@
         <p-menu #actionMenu [model]="menuItems()" [popup]="true" styleClass="w-52!" appendTo="body" />
     </div>
 } @else {
-    <div class="prestataires-desktop flex flex-col bg-surface-0 dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
+    <div class="ventes-desktop flex flex-col bg-surface-0 dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
         <div class="px-6 py-5 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Prestataires</h1>
+            <h1 class="text-surface-950 dark:text-surface-0 text-lg font-medium leading-7">Ventes</h1>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <p-iconfield class="w-full sm:w-[240px]">
@@ -164,7 +160,7 @@
                     [options]="filterOptions"
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="Tous"
+                    placeholder="Toutes"
                     class="w-full sm:w-[170px]"
                     appendTo="body"
                 />
@@ -172,11 +168,11 @@
                 @if (canCreate) {
                     <p-button
                         icon="pi pi-plus"
-                        label="Nouveau"
+                        label="Nouvelle"
                         severity="primary"
                         [rounded]="true"
                         class="w-full sm:w-auto cursor-pointer"
-                        (onClick)="navigateToCreate()"
+                        (onClick)="goNew()"
                     />
                 }
             </div>
@@ -186,12 +182,12 @@
             @if (loading) {
                 <div class="py-10 text-center text-surface-500 dark:text-surface-400">
                     <i class="pi pi-spin pi-spinner text-2xl mb-3 block"></i>
-                    Chargement des prestataires...
+                    Chargement des ventes...
                 </div>
             } @else {
                 <p-table
-                    [value]="filteredPrestataires()"
-                    [(selection)]="selectedPrestataires"
+                    [value]="filteredCommandes()"
+                    [(selection)]="selectedCommandes"
                     [paginator]="true"
                     [rows]="rows"
                     [first]="first"
@@ -204,71 +200,83 @@
                 >
                     <ng-template #header>
                         <tr>
-                            <th pSortableColumn="nom_complet">
-                                <span class="flex items-center gap-2">Nom complet <p-sortIcon field="nom_complet" /></span>
+                            <th style="width: 3rem">
+                                <p-tableHeaderCheckbox />
                             </th>
-                            <th pSortableColumn="phone">
-                                <span class="flex items-center gap-2">Telephone <p-sortIcon field="phone" /></span>
+                            <th pSortableColumn="reference" class="flex-1">
+                                <span class="flex items-center gap-2">Commande <p-sortIcon field="reference" /></span>
                             </th>
-                            <th pSortableColumn="type_label">
-                                <span class="flex items-center gap-2">Type <p-sortIcon field="type_label" /></span>
+                            <th class="flex-1">
+                                <span class="flex items-center gap-2">Vehicule</span>
                             </th>
-                            <th pSortableColumn="adresse">
-                                <span class="flex items-center gap-2">Adresse <p-sortIcon field="adresse" /></span>
+                            <th class="flex-1">
+                                <span class="flex items-center gap-2">Livreur</span>
                             </th>
-                            <th pSortableColumn="is_active">
-                                <span class="flex items-center gap-2">Statut <p-sortIcon field="is_active" /></span>
+                            <th pSortableColumn="total_commande" class="flex-1">
+                                <span class="flex items-center gap-2">Total <p-sortIcon field="total_commande" /></span>
+                            </th>
+                            <th class="flex-1">
+                                <span class="flex items-center gap-2">Statut</span>
+                            </th>
+                            <th pSortableColumn="created_at" class="flex-1">
+                                <span class="flex items-center gap-2">Date <p-sortIcon field="created_at" /></span>
                             </th>
                             <th style="width: 6rem">Actions</th>
                         </tr>
                     </ng-template>
-
-                    <ng-template #body let-prestataire>
+                    <ng-template #body let-commande>
                         <tr>
+                            <td style="width: 3rem">
+                                <p-tableCheckbox [value]="commande" />
+                            </td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-100 text-xs font-semibold flex items-center justify-center">
-                                        {{ getInitials(prestataire.nom_complet) }}
+                                        <i class="pi pi-shopping-cart text-xs"></i>
                                     </div>
                                     <span class="text-surface-950 dark:text-surface-0 text-sm font-medium leading-tight">
-                                        {{ prestataire.nom_complet }}
+                                        {{ commande.reference }}
                                     </span>
                                 </div>
                             </td>
-
+                            <td>
+                                <div class="text-surface-700 dark:text-surface-300 text-sm font-medium leading-tight">
+                                    {{ commande.vehicule?.nom_vehicule || '-' }}
+                                </div>
+                                <div class="text-surface-500 dark:text-surface-400 text-xs leading-tight">
+                                    {{ commande.vehicule?.immatriculation || '-' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-surface-700 dark:text-surface-300 text-sm font-medium leading-tight">
+                                    {{ getLivreurName(commande) }}
+                                </div>
+                                <div class="text-surface-500 dark:text-surface-400 text-xs leading-tight">
+                                    {{ getLivreurPhone(commande) ? (getLivreurPhone(commande) | phoneFormat) : '-' }}
+                                </div>
+                            </td>
                             <td>
                                 <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
-                                    {{ prestataire.phone | phoneFormat }}
+                                    {{ formatMontant(commande.total_commande) }}
                                 </span>
                             </td>
-
                             <td>
                                 <p-tag
-                                    [value]="getTypeLabel(prestataire)"
-                                    [severity]="getTypeSeverity(prestataire)"
-                                    class="px-2 py-1 rounded-[8px]"
-                                />
-                            </td>
-
-                            <td>
-                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
-                                    {{ getAddressLabel(prestataire) }}
-                                </span>
-                            </td>
-
-                            <td>
-                                <p-tag
-                                    [value]="getStatusLabel(prestataire)"
-                                    [severity]="getStatusSeverity(prestataire)"
+                                    [value]="getStatutLabel(commande.facture?.statut_facture)"
+                                    [severity]="getStatutSeverity(commande.facture?.statut_facture)"
                                     class="px-2 py-1 rounded-[6px]"
                                 />
                             </td>
-
                             <td>
-                                @if (canUpdate || canDelete) {
+                                <span class="text-surface-500 dark:text-surface-400 text-sm font-normal leading-tight">
+                                    {{ formatDate(commande.created_at) }}
+                                </span>
+                            </td>
+                            <td>
+                                @if (canRead || canUpdate || canDelete) {
                                     <div class="flex items-center gap-1">
                                         <p-button
-                                            (onClick)="toggleMenu($event, prestataire.id)"
+                                            (onClick)="toggleMenu($event, commande.id)"
                                             [rounded]="true"
                                             [text]="true"
                                             icon="pi pi-ellipsis-h"
@@ -281,14 +289,6 @@
                             </td>
                         </tr>
                     </ng-template>
-
-                    <ng-template #emptymessage>
-                        <tr>
-                            <td colspan="6" class="py-10 text-center text-surface-500 dark:text-surface-400">
-                                Aucun prestataire trouve.
-                            </td>
-                        </tr>
-                    </ng-template>
                 </p-table>
             }
 
@@ -296,3 +296,50 @@
         </div>
     </div>
 }
+
+<p-dialog
+    header="Annuler la vente"
+    [(visible)]="annulationDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '32rem' }"
+>
+    <div class="flex flex-col gap-4 py-2">
+        <div class="flex items-start gap-3">
+            <i class="pi pi-ban text-red-500 text-3xl flex-shrink-0 mt-0.5"></i>
+            <p class="m-0 text-sm">
+                Annuler la vente <strong>{{ commandeToAnnuler?.reference }}</strong> ?
+            </p>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">Motif d'annulation <span class="text-red-500">*</span></label>
+            <textarea
+                rows="3"
+                maxlength="500"
+                placeholder="Indiquez le motif de l'annulation..."
+                [value]="motifAnnulation"
+                (input)="motifAnnulation = $any($event.target).value"
+                class="w-full text-sm"
+                style="border: 1px solid var(--p-surface-300); border-radius: 6px; padding: 0.5rem; resize: none; outline: none; font-family: inherit; background: var(--p-surface-0); color: var(--p-surface-900);"
+            ></textarea>
+            <small class="text-surface-400">{{ motifAnnulation.length }}/500 caractères</small>
+        </div>
+    </div>
+    <ng-template #footer>
+        <p-button
+            label="Retour"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="annulationDialogVisible = false"
+            [disabled]="annulationLoading"
+        />
+        <p-button
+            label="Confirmer l'annulation"
+            icon="pi pi-ban"
+            severity="danger"
+            (onClick)="confirmerAnnulation()"
+            [loading]="annulationLoading"
+            [disabled]="!motifAnnulation.trim()"
+        />
+    </ng-template>
+</p-dialog>

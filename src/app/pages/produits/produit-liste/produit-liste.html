@@ -76,39 +76,48 @@
                 <section class="mobile-list">
                     @for (produit of mobileFilteredProduits; track produit.id) {
                         <article class="mobile-produit-card" (click)="router.navigate(['/produits/edit', produit.id])">
-                            <div class="mobile-card-header">
-                                <div class="mobile-card-title-wrap">
-                                    <h3 class="mobile-card-title">{{ produit.nom }}</h3>
-                                    <p class="mobile-card-code">
-                                        {{ produit.code_interne || produit.code_fournisseur || 'Sans reference' }}
-                                    </p>
+                            <div class="mobile-card-thumb">
+                                @if (produit.image_url) {
+                                    <img [src]="produit.getImageUrl()" [alt]="produit.nom" class="mobile-card-img" />
+                                } @else {
+                                    <i class="pi pi-box"></i>
+                                }
+                            </div>
+
+                            <div class="mobile-card-body">
+                                <div class="mobile-card-header">
+                                    <div class="mobile-card-title-wrap">
+                                        <p class="mobile-card-code">{{ produit.code_interne || produit.code_fournisseur || 'Sans reference' }}</p>
+                                        <h3 class="mobile-card-title">{{ produit.nom }}</h3>
+                                    </div>
+                                    <div class="mobile-card-badges">
+                                        <p-tag [value]="getStatutLabel(produit.statut)" [severity]="getStatutSeverity(produit.statut)" />
+                                        @if (produit.is_global) {
+                                            <span class="mobile-global-badge"><i class="pi pi-globe"></i> Global</span>
+                                        }
+                                    </div>
                                 </div>
 
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-ellipsis-h"
-                                    class="p-button-rounded p-button-text"
-                                    aria-label="Actions"
-                                    (click)="toggleMenu($event, produit.id); $event.stopPropagation()"
-                                ></button>
+                                <div class="mobile-card-footer">
+                                    <span class="mobile-stock">
+                                        @if (produit.type === 'service') {
+                                            Stock: infini
+                                        } @else {
+                                            {{ produit.qte_stock }} en stock · {{ formatPrice(produit.prix_vente) }}
+                                        }
+                                    </span>
+                                    <i class="pi pi-chevron-right mobile-card-arrow"></i>
+                                </div>
                             </div>
 
-                            <div class="mobile-card-tags">
-                                <p-tag [value]="getTypeLabel(produit.type)" [severity]="getTypeSeverity(produit.type)" />
-                                <p-tag [value]="getStatutLabel(produit.statut)" [severity]="getStatutSeverity(produit.statut)" />
-                            </div>
-
-                            <div class="mobile-card-footer">
-                                <span class="mobile-price">{{ formatPrice(produit.prix_vente) }}</span>
-                                <span class="mobile-stock">
-                                    @if (produit.type === 'service') {
-                                        Stock: infini
-                                    } @else {
-                                        Stock: {{ produit.qte_stock }}
-                                    }
-                                </span>
-                            </div>
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-ellipsis-h"
+                                class="p-button-rounded p-button-text mobile-card-menu-btn"
+                                aria-label="Actions"
+                                (click)="toggleMenu($event, produit.id); $event.stopPropagation()"
+                            ></button>
                         </article>
                     }
                 </section>

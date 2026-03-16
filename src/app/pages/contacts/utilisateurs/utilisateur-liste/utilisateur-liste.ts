@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -9,6 +10,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
@@ -46,6 +48,7 @@ interface UtilisateurRow extends User {
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
+    SkeletonModule,
     PhoneFormatPipe,
     UtilisateurFormDialog,
   ],
@@ -72,6 +75,9 @@ export class UtilisateurListe implements OnInit {
   viewDialogVisible = false;
   viewUserId: number | null = null;
   viewDialogMode: 'create' | 'edit' = 'edit';
+  isMobileView = false;
+  private readonly mobileBreakpoint = 768;
+  mobileFilterMenuItems: MenuItem[] = [];
   private siteLabelById = new Map<number, string>();
   private siteHydrationRequested = new Set<number>();
 
@@ -131,11 +137,19 @@ export class UtilisateurListe implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
+    this.syncMobileMode();
+    this.buildMobileFilterMenuItems();
     this.loadSites();
     this.load();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncMobileMode();
   }
 
   load(): void {
@@ -167,6 +181,16 @@ export class UtilisateurListe implements OnInit {
     this.viewDialogMode = 'create';
     this.viewUserId = null;
     this.viewDialogVisible = true;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
+
+  handleCardClick(user: UtilisateurRow): void {
+    if (this.canUpdate) {
+      this.goEdit(user);
+    }
   }
 
   goEdit(user: UtilisateurRow): void {
@@ -281,6 +305,24 @@ export class UtilisateurListe implements OnInit {
 
   getStatusSeverity(status: 'Actif' | 'Inactif'): StatusSeverity {
     return status === 'Actif' ? 'success' : 'danger';
+  }
+
+  private syncMobileMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobileView = false;
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private buildMobileFilterMenuItems(): void {
+    this.mobileFilterMenuItems = [
+      { label: 'Tous', icon: 'pi pi-filter-slash', command: () => this.onFilterChange('all') },
+      { separator: true },
+      { label: 'Actifs', command: () => this.onFilterChange('actif') },
+      { label: 'Inactifs', command: () => this.onFilterChange('inactif') },
+    ];
   }
 
   private matchesSearch(user: UtilisateurRow, query: string): boolean {

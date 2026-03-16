@@ -2,7 +2,7 @@
     display: block;
 }
 
-// Hide the default p-fileupload header/toolbar
+// ── FileUpload overrides ─────────────────────────────────────────────────────
 ::ng-deep .p-fileupload-header,
 ::ng-deep .p-fileupload-buttonbar {
     display: none !important;
@@ -12,4 +12,302 @@
     padding: 0 !important;
     border: none !important;
     background: transparent !important;
+}
+
+::ng-deep .pf-file-upload-hidden {
+    .p-fileupload-header,
+    .p-fileupload-buttonbar {
+        display: none !important;
+    }
+    .p-fileupload-content {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+}
+
+// ── Mobile layout ────────────────────────────────────────────────────────────
+.pf-mobile {
+    --pf-bg: #f1f5f9;
+    --pf-card: #ffffff;
+    --pf-border: #e2e8f0;
+    --pf-text: #1e293b;
+    --pf-muted: #64748b;
+    --pf-label-color: #94a3b8;
+    --pf-primary: #6366f1;
+
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--pf-bg);
+}
+
+// Header
+.pf-mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.5rem;
+    background: var(--pf-card);
+    border-bottom: 1px solid var(--pf-border);
+    flex-shrink: 0;
+}
+
+.pf-header-btn {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+    flex-shrink: 0;
+    color: var(--pf-primary) !important;
+}
+
+.pf-header-spacer {
+    width: 2.2rem;
+    flex-shrink: 0;
+}
+
+.pf-mobile-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pf-text);
+    margin: 0;
+}
+
+// Scroll body
+.pf-mobile-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.85rem 0.875rem calc(5rem + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+// Global alert
+.pf-global-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8rem;
+    color: #1d4ed8;
+
+    i { flex-shrink: 0; margin-top: 0.1rem; }
+}
+
+// Image card
+.pf-image-card {
+    background: var(--pf-card);
+    border: 1px solid var(--pf-border);
+    border-radius: 0.85rem;
+    overflow: hidden;
+    min-height: 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.pf-image-inner {
+    width: 100%;
+    min-height: 8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    position: relative;
+}
+
+.pf-no-img-icon {
+    font-size: 2rem;
+    color: #cbd5e1;
+}
+
+.pf-no-img-text {
+    font-size: 0.8rem;
+    color: var(--pf-muted);
+}
+
+.pf-image-preview {
+    width: 100%;
+    max-height: 12rem;
+    object-fit: contain;
+    display: block;
+}
+
+.pf-image-remove-btn {
+    position: absolute !important;
+    top: 0.4rem !important;
+    right: 0.4rem !important;
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    padding: 0 !important;
+}
+
+.pf-confirm-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border-radius: inherit;
+
+    p {
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+        padding: 0 1rem;
+    }
+}
+
+.pf-confirm-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pf-image-error {
+    position: absolute;
+    bottom: 0.4rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #ef4444;
+}
+
+// 2-column row
+.pf-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+// Fields
+.pf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.pf-field-full {
+    grid-column: 1 / -1;
+}
+
+.pf-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--pf-label-color);
+    text-transform: uppercase;
+}
+
+.pf-error {
+    font-size: 0.72rem;
+    color: #ef4444;
+    margin-top: 0.15rem;
+}
+
+// Section wrapper
+.pf-section {
+    background: var(--pf-card);
+    border: 1px solid var(--pf-border);
+    border-radius: 0.85rem;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.pf-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--pf-label-color);
+    text-transform: uppercase;
+    margin: 0;
+}
+
+// Toggles card
+.pf-toggles-card {
+    background: var(--pf-card);
+    border: 1px solid var(--pf-border);
+    border-radius: 0.85rem;
+    overflow: hidden;
+}
+
+.pf-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+
+    & + .pf-toggle-row {
+        border-top: 1px solid var(--pf-border);
+    }
+}
+
+.pf-toggle-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--pf-text);
+}
+
+.pf-toggle-value {
+    font-size: 0.8rem;
+    color: var(--pf-muted);
+    margin-left: 0.35rem;
+
+    &.active { color: #16a34a; }
+}
+
+.pf-toggle-sub {
+    font-size: 0.72rem;
+    color: var(--pf-muted);
+    margin: 0.1rem 0 0;
+}
+
+// Footer
+.pf-mobile-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    background: var(--pf-card);
+    border-top: 1px solid var(--pf-border);
+    display: flex;
+    gap: 0.6rem;
+    z-index: 20;
+}
+
+// Dark mode
+:host-context(.app-dark) {
+    .pf-mobile {
+        --pf-bg: var(--p-surface-950);
+        --pf-card: var(--p-surface-800);
+        --pf-border: var(--p-surface-600);
+        --pf-text: var(--p-surface-0);
+        --pf-muted: var(--p-surface-400);
+        --pf-label-color: var(--p-surface-500);
+    }
+
+    .pf-global-alert {
+        background: #1e3a5f;
+        border-color: #1d4ed8;
+        color: #93c5fd;
+    }
 }

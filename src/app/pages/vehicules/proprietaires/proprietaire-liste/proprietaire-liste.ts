@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
@@ -10,6 +10,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
@@ -43,6 +44,7 @@ interface ProprietaireRow extends Proprietaire {
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
+    SkeletonModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
@@ -65,6 +67,9 @@ export class ProprietaireListe implements OnInit {
   first = 0;
   rows = 8;
   selectedProprietaireId = signal<number | null>(null);
+  isMobileView = false;
+  private readonly mobileBreakpoint = 768;
+  mobileFilterMenuItems: MenuItem[] = [];
 
   get canCreate(): boolean {
     return this.authService.hasPermission('proprietaires.create');
@@ -120,7 +125,14 @@ export class ProprietaireListe implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.syncMobileMode();
+    this.buildMobileFilterMenuItems();
     this.load();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncMobileMode();
   }
 
   load(): void {
@@ -148,6 +160,16 @@ export class ProprietaireListe implements OnInit {
 
   goNew(): void {
     this.router.navigate(['/vehicules/proprietaires/new']);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
+
+  handleCardClick(proprietaire: ProprietaireRow): void {
+    if (this.canUpdate) {
+      this.goEdit(proprietaire);
+    }
   }
 
   goEdit(proprietaire: ProprietaireRow): void {
@@ -250,5 +272,23 @@ export class ProprietaireListe implements OnInit {
   private isProprietaireActive(proprietaire: Proprietaire): boolean {
     const status = (proprietaire as { is_active: unknown }).is_active;
     return status === true || status === 1 || status === '1';
+  }
+
+  private syncMobileMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobileView = false;
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private buildMobileFilterMenuItems(): void {
+    this.mobileFilterMenuItems = [
+      { label: 'Tous', icon: 'pi pi-filter-slash', command: () => this.onFilterChange('all') },
+      { separator: true },
+      { label: 'Actifs', command: () => this.onFilterChange('actif') },
+      { label: 'Inactifs', command: () => this.onFilterChange('inactif') },
+    ];
   }
 }

@@ -149,7 +149,7 @@ export class VehiculeListe implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/vehicules']);
+    this.router.navigate(['/']);
   }
 
   onImageError(vehicule: Vehicule): void {

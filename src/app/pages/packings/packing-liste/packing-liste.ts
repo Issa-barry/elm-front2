@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
@@ -10,6 +10,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
@@ -42,6 +43,7 @@ interface PackingRow extends Packing {
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
+    SkeletonModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
@@ -65,6 +67,9 @@ export class PackingListe implements OnInit {
   first = 0;
   rows = 10;
   selectedPackingId = signal<number | null>(null);
+  isMobileView = false;
+  private readonly mobileBreakpoint = 768;
+  mobileFilterMenuItems: MenuItem[] = [];
 
   get canCreate(): boolean {
     return this.authService.hasPermission('packings.create');
@@ -131,7 +136,14 @@ export class PackingListe implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.syncMobileMode();
+    this.buildMobileFilterMenuItems();
     this.load();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncMobileMode();
   }
 
   load(): void {
@@ -159,6 +171,21 @@ export class PackingListe implements OnInit {
 
   goNew(): void {
     this.router.navigate(['/packings/new']);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
+
+  handleCardClick(packing: PackingRow): void {
+    if (this.canUpdate) {
+      this.goEdit(packing);
+      return;
+    }
+
+    if (this.canRead) {
+      this.goDetails(packing);
+    }
   }
 
   goEdit(packing: PackingRow): void {
@@ -240,6 +267,26 @@ export class PackingListe implements OnInit {
 
   formatCurrency(value: number): string {
     return `${new Intl.NumberFormat('fr-FR').format(value ?? 0)} GNF`;
+  }
+
+  private syncMobileMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobileView = false;
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private buildMobileFilterMenuItems(): void {
+    this.mobileFilterMenuItems = [
+      { label: 'Tous', icon: 'pi pi-filter-slash', command: () => this.onFilterChange('all') },
+      { separator: true },
+      { label: 'Impayee', command: () => this.onFilterChange('impayee') },
+      { label: 'Partielle', command: () => this.onFilterChange('partielle') },
+      { label: 'Payee', command: () => this.onFilterChange('payee') },
+      { label: 'Annulee', command: () => this.onFilterChange('annulee') },
+    ];
   }
 
   private toRow(packing: Packing): PackingRow {

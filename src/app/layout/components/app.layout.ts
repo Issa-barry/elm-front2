@@ -1,21 +1,26 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { AppConfigurator } from './app.configurator';
 import { AppProfileSidebar } from './app.profilesidebar';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
     imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppConfigurator, AppProfileSidebar],
     template: `<div class="layout-container" [ngClass]="containerClass()">
-        <div app-sidebar></div>
-        <div class="layout-content-wrapper">
-            <div app-topbar></div>
-            <div class="layout-content">
+        @if (showTopbar()) {
+            <div app-sidebar></div>
+        }
+        <div class="layout-content-wrapper" [class.mobile-fullscreen]="!showTopbar()">
+            @if (showTopbar()) {
+                <div app-topbar></div>
+            }
+            <div class="layout-content" [class.mobile-fullscreen-content]="!showTopbar()">
                 <router-outlet></router-outlet>
             </div>
         </div>
@@ -26,8 +31,23 @@ import { AppProfileSidebar } from './app.profilesidebar';
 })
 export class AppLayout {
     layoutService = inject(LayoutService);
+    private router = inject(Router);
+
+    private isMobile = signal(typeof window !== 'undefined' && window.innerWidth <= 768);
+    private isHome = signal(true);
+
+    showTopbar = computed(() => !this.isMobile() || this.isHome());
+
+    @HostListener('window:resize')
+    onResize() {
+        this.isMobile.set(window.innerWidth <= 768);
+    }
 
     constructor() {
+        this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+            this.isHome.set(e.urlAfterRedirects === '/' || e.urlAfterRedirects === '');
+        });
+
         effect(() => {
             const state = this.layoutService.layoutState();
             if (state.mobileMenuActive) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
@@ -10,6 +10,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { Menu, MenuModule } from 'primeng/menu';
 import { SelectModule } from 'primeng/select';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
@@ -38,6 +39,7 @@ type StatusSeverity = 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'co
     TagModule,
     ConfirmDialogModule,
     MenuModule,
+    SkeletonModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
@@ -55,6 +57,9 @@ export class PrestataireListe implements OnInit {
   selectedPrestataires: Prestataire[] = [];
   first = 0;
   rows = 10;
+  isMobileView = false;
+  private readonly mobileBreakpoint = 768;
+  mobileFilterMenuItems: MenuItem[] = [];
 
   readonly filterOptions: { label: string; value: PrestataireFilter }[] = [
     { label: 'Tous', value: 'all' },
@@ -126,7 +131,14 @@ export class PrestataireListe implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.syncMobileMode();
+    this.buildMobileFilterMenuItems();
     this.loadPrestataires();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncMobileMode();
   }
 
   loadPrestataires(): void {
@@ -173,6 +185,16 @@ export class PrestataireListe implements OnInit {
 
   navigateToCreate(): void {
     this.router.navigate(['/contacts/prestataires/new']);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
+
+  handleCardClick(prestataire: Prestataire): void {
+    if (this.canUpdate) {
+      this.goToEdit(prestataire);
+    }
   }
 
   goToEdit(prestataire: Prestataire): void {
@@ -298,6 +320,24 @@ export class PrestataireListe implements OnInit {
 
   getStatusSeverity(prestataire: Prestataire): StatusSeverity {
     return prestataire.is_active ? 'success' : 'danger';
+  }
+
+  private syncMobileMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobileView = false;
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private buildMobileFilterMenuItems(): void {
+    this.mobileFilterMenuItems = [
+      { label: 'Tous', icon: 'pi pi-filter-slash', command: () => this.onFilterChange('all') },
+      { separator: true },
+      { label: 'Actifs', command: () => this.onFilterChange('actif') },
+      { label: 'Inactifs', command: () => this.onFilterChange('inactif') },
+    ];
   }
 
   private matchesSearch(prestataire: Prestataire, query: string): boolean {

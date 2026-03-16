@@ -55,6 +55,19 @@
         padding: 1rem;
     }
 
+    .layout-content-wrapper.mobile-fullscreen {
+        padding: 0;
+        margin: 0;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .layout-content.mobile-fullscreen-content {
+        height: 100dvh;
+        overflow: hidden;
+        padding: 0;
+    }
+
     .layout-sidebar {
         z-index: 999;
         transform: translateX(-100%);

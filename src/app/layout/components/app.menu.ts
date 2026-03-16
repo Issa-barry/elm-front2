@@ -43,6 +43,11 @@ export class AppMenu {
             items: [
                 
                 {
+                    label: 'Ventes',
+                    icon: 'pi pi-fw pi-box',
+                    routerLink: ['/ventes']
+                },
+                {
                     label: 'Packing',
                     icon: 'pi pi-fw pi-box',
                     routerLink: ['/packings']

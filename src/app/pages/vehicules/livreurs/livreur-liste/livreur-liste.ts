@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { Menu, MenuModule } from 'primeng/menu';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import { Livreur } from '@/models/vehicule.model';
 import { LivreurService } from '@/services/livreurs/livreur.service';
@@ -46,6 +47,7 @@ interface LivreurRow extends Livreur {
         SelectModule,
         MenuModule,
         ConfirmDialogModule,
+        SkeletonModule,
         PhoneFormatPipe
     ],
     providers: [ConfirmationService],
@@ -76,6 +78,10 @@ export class LivreurListe implements OnInit {
     first = 0;
     rows = 8;
     selectedUserId = signal<number | null>(null);
+    isMobileView = false;
+    private readonly mobileBreakpoint = 768;
+    mobileFilterMenuItems: MenuItem[] = [];
+    loading = false;
 
     menuItems = computed<MenuItem[]>(() => {
         const userId = this.selectedUserId();
@@ -121,10 +127,18 @@ export class LivreurListe implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        this.syncMobileMode();
+        this.buildMobileFilterMenuItems();
         this.load();
     }
 
+    @HostListener('window:resize')
+    onWindowResize(): void {
+        this.syncMobileMode();
+    }
+
     load(): void {
+        this.loading = true;
         const filter = this.selectedFilter();
         const statut = filter === 'all' ? undefined : filter;
 
@@ -132,9 +146,11 @@ export class LivreurListe implements OnInit {
             next: (resp) => {
                 const rows = (resp.data?.data ?? []).map((livreur) => this.toRow(livreur));
                 this.users.set(rows);
+                this.loading = false;
             },
             error: () => {
                 this.users.set([]);
+                this.loading = false;
             }
         });
     }
@@ -177,6 +193,14 @@ export class LivreurListe implements OnInit {
 
     addNewUser(): void {
         this.router.navigate(['/vehicules/livreurs/new']);
+    }
+
+    goBack(): void {
+        this.router.navigate(['/']);
+    }
+
+    handleCardClick(user: LivreurRow): void {
+        this.goEdit(user);
     }
 
     goEdit(user: LivreurRow): void {
@@ -260,5 +284,23 @@ export class LivreurListe implements OnInit {
             return;
         }
         this.confirmDelete(user);
+    }
+
+    private syncMobileMode(): void {
+        if (typeof window === 'undefined') {
+            this.isMobileView = false;
+            return;
+        }
+
+        this.isMobileView = window.innerWidth <= this.mobileBreakpoint;
+    }
+
+    private buildMobileFilterMenuItems(): void {
+        this.mobileFilterMenuItems = [
+            { label: 'Tous', icon: 'pi pi-filter-slash', command: () => this.onFilterChange('all') },
+            { separator: true },
+            { label: 'Actifs', command: () => this.onFilterChange('actif') },
+            { label: 'Inactifs', command: () => this.onFilterChange('inactif') },
+        ];
     }
 }

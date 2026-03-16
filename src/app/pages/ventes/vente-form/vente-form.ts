@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -23,6 +23,8 @@ interface PosProduct {
   stock: number;
   image: string;
   category: string;
+  barcode?: string;
+  qrCode?: string;
 }
 
 interface PosCartItem {
@@ -74,6 +76,8 @@ export class VenteForm implements OnInit {
       stock: 120,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-1.jpg',
       category: 'pack',
+      barcode: '100000000001|202603120001',
+      qrCode: 'PACK30',
     },
     {
       id: 2,
@@ -83,6 +87,8 @@ export class VenteForm implements OnInit {
       stock: 85,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-2.jpg',
       category: 'pack',
+      barcode: '100000000002',
+      qrCode: 'PACK20',
     },
     {
       id: 3,
@@ -92,6 +98,8 @@ export class VenteForm implements OnInit {
       stock: 240,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-3.jpg',
       category: 'boisson',
+      barcode: '200000000001',
+      qrCode: 'BTL15',
     },
     {
       id: 4,
@@ -101,6 +109,8 @@ export class VenteForm implements OnInit {
       stock: 300,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-4.jpg',
       category: 'boisson',
+      barcode: '200000000002',
+      qrCode: 'BTL05',
     },
     {
       id: 5,
@@ -110,6 +120,8 @@ export class VenteForm implements OnInit {
       stock: 50,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-1.jpg',
       category: 'pack',
+      barcode: '300000000001',
+      qrCode: 'BIDON10',
     },
     {
       id: 6,
@@ -119,6 +131,8 @@ export class VenteForm implements OnInit {
       stock: 15,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-2.jpg',
       category: 'accessoire',
+      barcode: '400000000001',
+      qrCode: 'DISP-TABLE',
     },
     {
       id: 7,
@@ -128,6 +142,8 @@ export class VenteForm implements OnInit {
       stock: 400,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-3.jpg',
       category: 'accessoire',
+      barcode: '500000000001',
+      qrCode: 'GOBELET50',
     },
     {
       id: 8,
@@ -137,6 +153,8 @@ export class VenteForm implements OnInit {
       stock: 600,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-4.jpg',
       category: 'accessoire',
+      barcode: '500000000002',
+      qrCode: 'BOUCHON100',
     },
     {
       id: 9,
@@ -146,6 +164,8 @@ export class VenteForm implements OnInit {
       stock: 180,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-1.jpg',
       category: 'pack',
+      barcode: '100000000003',
+      qrCode: 'PACK10',
     },
     {
       id: 10,
@@ -155,6 +175,8 @@ export class VenteForm implements OnInit {
       stock: 95,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-2.jpg',
       category: 'boisson',
+      barcode: '200000000003',
+      qrCode: 'GAL5',
     },
     {
       id: 11,
@@ -164,6 +186,8 @@ export class VenteForm implements OnInit {
       stock: 60,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-3.jpg',
       category: 'accessoire',
+      barcode: '400000000002',
+      qrCode: 'POMPE',
     },
     {
       id: 12,
@@ -173,6 +197,8 @@ export class VenteForm implements OnInit {
       stock: 220,
       image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-4.jpg',
       category: 'accessoire',
+      barcode: '500000000003',
+      qrCode: 'VERRE100',
     },
   ];
 
@@ -255,6 +281,103 @@ export class VenteForm implements OnInit {
 
   get posTotal(): number {
     return this.posSubtotal + this.posTax + this.posShipping;
+  }
+
+  private scanBuffer = '';
+  private scanTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  @HostListener('window:keydown', ['$event'])
+  onScannerKeydown(event: KeyboardEvent): void {
+    if (this.shouldIgnoreScan(event)) return;
+
+    if (event.key === 'Enter') {
+      const payload = this.scanBuffer.trim();
+      if (payload.length > 0) {
+        this.handleScan(payload);
+      }
+      this.scanBuffer = '';
+      if (this.scanTimeout) {
+        clearTimeout(this.scanTimeout);
+        this.scanTimeout = null;
+      }
+      return;
+    }
+
+    if (event.key.length !== 1) return;
+
+    this.scanBuffer += event.key;
+    if (this.scanTimeout) clearTimeout(this.scanTimeout);
+    this.scanTimeout = setTimeout(() => {
+      this.scanBuffer = '';
+      this.scanTimeout = null;
+    }, 120);
+  }
+
+  private handleScan(raw: string): void {
+    const code = raw.trim();
+    if (!code) return;
+    const candidates = this.buildScanCandidates(code);
+    const product = this.posProducts.find((p) => this.matchesProductCode(p, candidates));
+    if (product) {
+      this.addToCart(product);
+    }
+  }
+
+  private buildScanCandidates(code: string): Set<string> {
+    const normalized = this.normalizeScanCode(code);
+    const digitsOnly = normalized.replace(/[^0-9]/g, '');
+    const set = new Set<string>();
+    [code, code.replace(/\s+/g, ''), normalized, normalized.replace(/\s+/g, ''), digitsOnly].forEach((v) => {
+      if (v) set.add(v);
+    });
+    return set;
+  }
+
+  private matchesProductCode(product: PosProduct, candidates: Set<string>): boolean {
+    const barcodeSet = this.splitCodes(product.barcode);
+    const qrSet = this.splitCodes(product.qrCode);
+    for (const c of candidates) {
+      if (barcodeSet.has(c) || qrSet.has(c) || String(product.id) === c) return true;
+    }
+    return false;
+  }
+
+  private splitCodes(value?: string): Set<string> {
+    return new Set(
+      (value ?? '')
+        .split('|')
+        .map((v) => v.trim())
+        .filter(Boolean)
+    );
+  }
+
+  private normalizeScanCode(code: string): string {
+    const map: Record<string, string> = {
+      '&': '1',
+      '\u00e9': '2',
+      '"': '3',
+      "'": '4',
+      '(': '5',
+      '-': '6',
+      '\u00e8': '7',
+      '_': '8',
+      '\u00e7': '9',
+      '\u00e0': '0',
+    };
+    let out = '';
+    for (const ch of code) {
+      out += map[ch] ?? ch;
+    }
+    return out;
+  }
+
+  private shouldIgnoreScan(event: KeyboardEvent): boolean {
+    if (event.altKey || event.ctrlKey || event.metaKey) return true;
+    const target = event.target as HTMLElement | null;
+    if (!target) return false;
+    if (target.hasAttribute?.('data-scan-input')) return false;
+    const tag = target.tagName?.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
   }
 
   addToCart(product: PosProduct): void {

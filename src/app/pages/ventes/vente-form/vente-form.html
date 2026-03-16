@@ -1,140 +1,214 @@
-             <div id="slideover-cart-ext" class="bg-surface-0 dark:bg-surface-900 absolute inset-y-0 right-0 shadow-xl h-full w-full md:w-211.5 flex flex-col justify-start items-start overflow-hidden">
-                <div class="w-full p-6 bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
-                    <div class="flex-1 text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">Your Cart</div>
-                    <button pButton pStyleClass="#slideover-cart-ext" leaveToClass="hidden" leaveActiveClass="animate-fadeoutright" [text]="true" [rounded]="true" class="w-10 h-10">
-                        <i pButtonIcon class="pi pi-times"></i>
-                    </button>
-                </div>
-
-                <div class="flex-1 flex justify-start items-start w-full">
-                    <div class="hidden md:flex w-106 h-full p-6 bg-surface-0 dark:bg-surface-900 flex-col justify-start items-start gap-6">
-                        <div class="w-full text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Related Products</div>
-
-                        <div class="w-full p-4 bg-surface-0 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 flex justify-start items-start gap-4">
-                            <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-2.jpg" class="w-26 h-26 rounded-lg shrink-0" />
-                            <div class="flex-1 flex flex-col justify-start items-start gap-4">
-                                <div class="w-full flex justify-start items-start gap-4">
-                                    <div class="flex-1 flex flex-col justify-center items-start gap-2">
-                                        <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Deep Calm Shampoo</div>
-                                        <div class="text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Bergamot</div>
-                                    </div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$9.50</div>
-                                </div>
-                                <div class="w-full flex justify-end items-center gap-4">
-                                    <button pButton class="w-10" severity="secondary">
-                                        <i pButtonIcon class="pi pi-shopping-cart"></i>
-                                    </button>
-                                </div>
+<div class="fixed inset-0 bg-surface-50 dark:bg-surface-950 overflow-hidden" style="z-index: 60;">
+    <div class="flex flex-col md:flex-row h-full">
+        <section class="flex-1 min-w-0 flex flex-col">
+            <div class="px-6 py-4 bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700">
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-wrap items-center gap-4 justify-between">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs uppercase tracking-wide text-surface-500">POS</span>
+                                <span class="text-xl font-semibold text-surface-900 dark:text-surface-0">Nouvelle vente</span>
+                            </div>
+                            <div class="w-full md:w-64">
+                                <label class="text-xs text-surface-500">Recherche</label>
+                                <input
+                                    type="text"
+                                    class="w-full mt-1 px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900"
+                                    placeholder="Rechercher un produit"
+                                    [(ngModel)]="searchQuery"
+                                />
                             </div>
                         </div>
-
-                        <div class="w-full p-4 bg-surface-0 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 flex justify-start items-start gap-4">
-                            <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-3.jpg" class="w-26 h-26 rounded-lg shrink-0" />
-                            <div class="flex-1 flex flex-col justify-start items-start gap-4">
-                                <div class="w-full flex justify-start items-start gap-4">
-                                    <div class="flex-1 flex flex-col justify-center items-start gap-2">
-                                        <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Daily Restore Facial Serum Set</div>
-                                        <div class="text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Normal to Dry</div>
-                                    </div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$16.00</div>
-                                </div>
-                                <div class="w-full flex justify-end items-center gap-4">
-                                    <button pButton class="w-10" severity="secondary">
-                                        <i pButtonIcon class="pi pi-shopping-cart"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-full text-xs border transition-colors"
+                                [ngClass]="{
+                                    'bg-primary-500 text-white border-primary-500': saleType === 'rapide',
+                                    'bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-600': saleType !== 'rapide'
+                                }"
+                                (click)="saleType = 'rapide'"
+                            >
+                                Vente rapide
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-full text-xs border transition-colors"
+                                [ngClass]="{
+                                    'bg-primary-500 text-white border-primary-500': saleType === 'client',
+                                    'bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-600': saleType !== 'client'
+                                }"
+                                (click)="saleType = 'client'"
+                            >
+                                Client
+                            </button>
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-full text-xs border transition-colors"
+                                [ngClass]="{
+                                    'bg-primary-500 text-white border-primary-500': saleType === 'livreur',
+                                    'bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-600': saleType !== 'livreur'
+                                }"
+                                (click)="saleType = 'livreur'"
+                            >
+                                Livreur
+                            </button>
                         </div>
+                    </div>
 
-                        <div class="w-full p-4 bg-surface-0 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 flex justify-start items-start gap-4">
-                            <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-4.jpg" class="w-26 h-26 rounded-lg shrink-0" />
-                            <div class="flex-1 flex flex-col justify-start items-start gap-4">
-                                <div class="w-full flex justify-start items-start gap-4">
-                                    <div class="flex-1 flex flex-col justify-center items-start gap-2">
-                                        <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Night Cream + Cleanser</div>
-                                        <div class="text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Lavender</div>
+                    <div class="flex flex-wrap items-end gap-4">
+                        <div class="ml-auto flex flex-wrap items-end gap-3">
+                            @if (saleType === 'client') {
+                                <div class="w-full md:w-72">
+                                    <label class="text-xs text-surface-500">Client</label>
+                                    <p-select
+                                        [options]="clientOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Choisir un client..."
+                                        [filter]="true"
+                                        filterPlaceholder="Rechercher un client"
+                                        [showClear]="true"
+                                        [loading]="loadingClients"
+                                        styleClass="w-full mt-1"
+                                        [(ngModel)]="selectedClientId"
+                                    ></p-select>
+                                </div>
+                            }
+
+                            @if (saleType === 'livreur') {
+                                <div class="w-full md:w-72">
+                                    <label class="text-xs text-surface-500">Vehicule livraison</label>
+                                    <p-select
+                                        [options]="vehiculeOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Choisir un vehicule..."
+                                        [filter]="true"
+                                        filterPlaceholder="Rechercher un vehicule"
+                                        [showClear]="true"
+                                        [loading]="loadingVehicules"
+                                        styleClass="w-full mt-1"
+                                        [(ngModel)]="selectedVehiculeId"
+                                    ></p-select>
+                                </div>
+                            }
+
+                            <div class="flex flex-wrap items-center gap-2 text-xs text-surface-600">
+                                @if (saleType === 'livreur') {
+                                    <div class="px-3 py-1.5 rounded-full bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+                                        <span class="text-surface-500">Vehicule</span>
+                                        <span class="font-medium text-surface-900 dark:text-surface-0 ml-1">{{ selectedVehiculeLabel }}</span>
                                     </div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$22.00</div>
-                                </div>
-                                <div class="w-full flex justify-end items-center gap-4">
-                                    <button pButton class="w-10" severity="secondary">
-                                        <i pButtonIcon class="pi pi-shopping-cart"></i>
-                                    </button>
-                                </div>
+                                    <div class="px-3 py-1.5 rounded-full bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+                                        <span class="text-surface-500">Livreur</span>
+                                        <span class="font-medium text-surface-900 dark:text-surface-0 ml-1">{{ selectedLivreurLabel }}</span>
+                                    </div>
+                                }
+                                @if (saleType === 'client') {
+                                    <div class="px-3 py-1.5 rounded-full bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+                                        <span class="text-surface-500">Client</span>
+                                        <span class="font-medium text-surface-900 dark:text-surface-0 ml-1">{{ selectedClientLabel }}</span>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
 
-                    <div class="w-full md:w-106 h-full p-6 bg-surface-0 dark:bg-surface-900 md:border-l border-surface-200 dark:border-surface-700 flex flex-col justify-start items-start gap-6">
-                        <div class="w-full flex justify-start items-start gap-4">
-                            <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/shoppingcart/extended-slide-over-1.jpg" class="w-26 h-26 rounded-lg shrink-0" />
-                            <div class="flex-1 h-26 flex flex-col justify-between items-start">
-                                <div class="w-full flex justify-start items-start gap-4">
-                                    <div class="flex-1 flex flex-col justify-center items-start gap-2">
-                                        <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Forest Body Wash</div>
-                                        <div class="text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Pine & Citrus</div>
-                                    </div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$18.00</div>
-                                </div>
-                                <div class="w-full flex justify-end items-end gap-4">
-                                    <button pButton [text]="true" class="w-10 py-2 bg-surface-100 dark:bg-surface-700 rounded-[6px]">
-                                        <i pButtonIcon class="pi pi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="w-full flex justify-start items-start">
-                            <div class="flex-1 flex flex-col justify-start items-start">
-                                <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
-                            </div>
-                        </div>
-
-                        <div class="w-full flex-1 flex flex-col justify-end items-start gap-6">
-                            <div class="w-full flex justify-start items-start">
-                                <div class="flex-1 flex flex-col justify-start items-start">
-                                    <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
-                                </div>
-                            </div>
-
-                            <div class="w-full flex flex-col justify-start items-start gap-3">
-                                <div class="w-full flex justify-start items-start gap-6">
-                                    <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-normal leading-tight">Subtotal</div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$18.00</div>
-                                </div>
-                                <div class="w-full flex justify-start items-start gap-6">
-                                    <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-normal leading-tight">Shipping</div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$4.00</div>
-                                </div>
-                                <div class="w-full flex justify-start items-start gap-6">
-                                    <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-normal leading-tight">Estimated Tax</div>
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">$1.44</div>
-                                </div>
-                            </div>
-
-                            <button pButton class="w-full text-center" severity="secondary">
-                                <span pButtonLabel>Add Coupon</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        @for (cat of posCategories; track cat.id) {
+                            <button
+                                type="button"
+                                class="px-3 py-1.5 rounded-full text-xs border transition-colors"
+                                [ngClass]="{
+                                    'bg-primary-500 text-white border-primary-500': selectedCategory === cat.id,
+                                    'bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 text-surface-600': selectedCategory !== cat.id
+                                }"
+                                (click)="selectedCategory = cat.id"
+                            >
+                                {{ cat.label }}
                             </button>
-
-                            <div class="w-full flex justify-start items-start">
-                                <div class="flex-1 flex flex-col justify-start items-start">
-                                    <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
-                                </div>
-                            </div>
-
-                            <div class="w-full flex justify-start items-start gap-4">
-                                <div class="flex justify-start items-end gap-2">
-                                    <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Total Amount</div>
-                                    <div class="text-surface-500 dark:text-surface-400 text-sm font-normal">incl. VAT</div>
-                                </div>
-                                <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">$23.44</div>
-                            </div>
-
-                            <button pButton class="w-full px-3 py-2 rounded-[6px]" severity="contrast">
-                                <span pButtonLabel>Place Order</span>
-                            </button>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>
- 
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    @for (p of filteredProducts; track p.id) {
+                        <div class="bg-surface-0 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 flex overflow-hidden">
+                            <div class="w-28 min-w-[112px] bg-surface-100 dark:bg-surface-800 self-stretch">
+                                <img [src]="p.image" [alt]="p.name" class="w-full h-full object-cover" />
+                            </div>
+                            <div class="flex-1 p-4 flex flex-col gap-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-semibold text-surface-900 dark:text-surface-0 truncate">{{ p.name }}</div>
+                                        <div class="text-xs text-surface-500">{{ p.variant }}</div>
+                                        <div class="text-xs text-surface-400 mt-1">Stock: {{ p.stock }}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ formatGnf(p.price) }}</div>
+                                    </div>
+                                </div>
+                                <button pButton class="w-full mt-auto" severity="secondary" (click)="addToCart(p)">
+                                    <span pButtonLabel>Ajouter</span>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <aside class="w-full md:w-[420px] xl:w-[480px] h-full bg-surface-0 dark:bg-surface-900 border-l border-surface-200 dark:border-surface-700 flex flex-col">
+            <div class="px-6 py-4 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
+                <div class="text-lg font-semibold text-surface-900 dark:text-surface-0">Panier</div>
+                <button pButton [text]="true" [rounded]="true" class="w-9 h-9">
+                    <i pButtonIcon class="pi pi-times"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+                @for (item of posCartItems; track item.id) {
+                    <div class="flex items-start gap-3 pb-4 border-b border-surface-100 dark:border-surface-800">
+                        <img [src]="item.image" [alt]="item.name" class="w-14 h-14 rounded-lg object-cover" />
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-semibold text-surface-900 dark:text-surface-0 truncate">{{ item.name }}</div>
+                            <div class="text-xs text-surface-500">{{ item.variant }}</div>
+                            <div class="text-xs text-surface-500 mt-1">Qty: {{ item.qty }}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ formatGnf(item.price * item.qty) }}</div>
+                            <button pButton [text]="true" [rounded]="true" class="w-8 h-8" (click)="removeFromCart(item.id)">
+                                <i pButtonIcon class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="p-6 border-t border-surface-200 dark:border-surface-700">
+                <div class="flex items-center justify-between text-sm text-surface-600">
+                    <span>Sous-total</span>
+                    <span class="font-medium text-surface-900 dark:text-surface-0">{{ formatGnf(posSubtotal) }}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm text-surface-600 mt-2">
+                    <span>Livraison</span>
+                    <span class="font-medium text-surface-900 dark:text-surface-0">{{ formatGnf(posShipping) }}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm text-surface-600 mt-2">
+                    <span>Taxe</span>
+                    <span class="font-medium text-surface-900 dark:text-surface-0">{{ formatGnf(posTax) }}</span>
+                </div>
+                <div class="flex items-center justify-between text-base font-semibold text-surface-900 dark:text-surface-0 mt-4">
+                    <span>Total</span>
+                    <span>{{ formatGnf(posTotal) }}</span>
+                </div>
+                <button pButton class="w-full mt-4" severity="contrast">
+                    <span pButtonLabel>Encaisser</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+</div>

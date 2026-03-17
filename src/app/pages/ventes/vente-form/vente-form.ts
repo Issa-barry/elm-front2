@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { StyleClassModule } from 'primeng/styleclass';
 
@@ -42,7 +43,7 @@ type SaleType = 'rapide' | 'client' | 'livreur';
 @Component({
   selector: 'app-vente-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, SelectModule, StyleClassModule],
+  imports: [CommonModule, FormsModule, ButtonModule, InputNumberModule, SelectModule, StyleClassModule],
   templateUrl: './vente-form.html',
   styleUrl: './vente-form.scss',
 })
@@ -228,6 +229,9 @@ export class VenteForm implements OnInit {
     private router: Router
   ) {}
 
+  showAddProduct = false;
+  selectedProductId: number | null = null;
+
   ngOnInit(): void {
     this.loadVehicules();
     this.loadClients();
@@ -258,7 +262,6 @@ export class VenteForm implements OnInit {
     return `${c.prenom ?? ''} ${c.nom ?? ''}`.trim() || '-';
   }
 
-
   get filteredProducts(): PosProduct[] {
     const q = this.searchQuery.trim().toLowerCase();
     return this.posProducts.filter((p) => {
@@ -283,6 +286,53 @@ export class VenteForm implements OnInit {
 
   get posTotal(): number {
     return this.posSubtotal + this.posTax + this.posShipping;
+  }
+
+  get posProductOptions(): { label: string; value: number }[] {
+    return this.posProducts.map((p) => ({
+      label: [p.name, p.variant].filter(Boolean).join(' - '),
+      value: p.id,
+    }));
+  }
+
+  get hasCartItems(): boolean {
+    return this.posCartItems.length > 0;
+  }
+
+  get isClientSale(): boolean {
+    return this.saleType === 'client';
+  }
+
+  get isLivreurSale(): boolean {
+    return this.saleType === 'livreur';
+  }
+
+  get isDeferredAllowed(): boolean {
+    return this.saleType !== 'rapide';
+  }
+
+  get hasRequiredParty(): boolean {
+    if (this.isClientSale) return this.selectedClientId != null;
+    if (this.isLivreurSale) return this.selectedVehiculeId != null;
+    return true;
+  }
+
+  get requiredPartyLabel(): string {
+    if (this.isClientSale) return 'un client';
+    if (this.isLivreurSale) return 'un véhicule';
+    return '';
+  }
+
+  get canCheckout(): boolean {
+    return this.hasCartItems && this.hasRequiredParty;
+  }
+
+  get canSaveLater(): boolean {
+    return this.hasCartItems && this.isDeferredAllowed && this.hasRequiredParty;
+  }
+
+  get showPartyError(): boolean {
+    return this.isDeferredAllowed && this.hasCartItems && !this.hasRequiredParty;
   }
 
   private scanBuffer = '';
@@ -416,8 +466,56 @@ export class VenteForm implements OnInit {
     item.qty = next;
   }
 
+  toggleAddProduct(): void {
+    this.showAddProduct = !this.showAddProduct;
+    if (!this.showAddProduct) {
+      this.selectedProductId = null;
+    }
+  }
+
+  addSelectedProduct(): void {
+    if (this.selectedProductId == null) return;
+    const product = this.posProducts.find((p) => p.id === this.selectedProductId);
+    if (!product) return;
+    this.addToCart(product);
+    this.selectedProductId = null;
+  }
+
+  setCartQty(itemId: number, nextQty: number | null): void {
+    if (nextQty == null) return;
+    const item = this.posCartItems.find((i) => i.id === itemId);
+    if (!item) return;
+    if (nextQty <= 0) {
+      this.removeFromCart(itemId);
+      return;
+    }
+    item.qty = nextQty;
+  }
+
   closePos(): void {
     this.router.navigate(['/ventes']);
+  }
+
+  checkout(): void {
+    if (!this.canCheckout) return;
+    // TODO: branch to payment flow / API integration
+    console.log('Créer commande', {
+      saleType: this.saleType,
+      clientId: this.selectedClientId,
+      vehiculeId: this.selectedVehiculeId,
+      items: this.posCartItems,
+    });
+  }
+
+  saveForLater(): void {
+    if (!this.canSaveLater) return;
+    // TODO: create sale in "non encaissé" state
+    console.log('Enregistrer sans encaissement', {
+      saleType: this.saleType,
+      clientId: this.selectedClientId,
+      vehiculeId: this.selectedVehiculeId,
+      items: this.posCartItems,
+    });
   }
 
   formatGnf(value: number): string {
@@ -469,6 +567,4 @@ export class VenteForm implements OnInit {
       },
     });
   }
-
 }
- 

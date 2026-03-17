@@ -63,6 +63,10 @@ export const appRoutes: Routes = [
                 path: 'ventes',
                 loadChildren: () => import('@/app/pages/ventes/ventes.routes')
             },
+             {
+                path: 'pdv',
+                loadChildren: () => import('@/app/pages/pdv/pdv.routes')
+            },
             {
                 path: 'apps',
                 loadChildren: () => import('@/app/apps/apps.routes'),

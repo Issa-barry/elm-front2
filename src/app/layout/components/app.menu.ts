@@ -41,7 +41,11 @@ export class AppMenu {
             icon: 'pi pi-th-large',
             path: '/apps',
             items: [
-                
+                   {
+                    label: 'PDV',
+                    icon: 'pi pi-fw pi-box',
+                    routerLink: ['/pdv']
+                },
                 {
                     label: 'Ventes',
                     icon: 'pi pi-fw pi-box',

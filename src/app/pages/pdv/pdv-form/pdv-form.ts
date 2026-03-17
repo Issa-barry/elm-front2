@@ -14,7 +14,7 @@ import { User } from '@/models/user.model';
 interface PosCategory {
   id: string;
   label: string;
-} 
+}
 
 interface PosProduct {
   id: number;
@@ -39,14 +39,15 @@ interface PosCartItem {
 
 type SaleType = 'rapide' | 'client' | 'livreur';
 
+
 @Component({
-  selector: 'app-vente-form',
+  selector: 'app-pdv-form',
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, SelectModule, StyleClassModule],
-  templateUrl: './vente-form.html',
-  styleUrl: './vente-form.scss',
+  templateUrl: './pdv-form.html',
+  styleUrl: './pdv-form.scss',
 })
-export class VenteForm implements OnInit {
+export class PdvForm implements OnInit {
   vehicules: Vehicule[] = [];
   vehiculeOptions: { label: string; value: number }[] = [];
   selectedVehiculeId: number | null = null;
@@ -471,4 +472,3 @@ export class VenteForm implements OnInit {
   }
 
 }
- 
